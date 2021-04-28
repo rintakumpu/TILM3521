@@ -148,16 +148,36 @@ Yksinkertaisin valinta ehdotusjakaumalle on $q(x_{1:k}|y_{1:k})$ eli toisin sano
 q(x_{1:k}|y_{1:k})=q(x_k|x_{1:k-1},y_{1:k})q(x_{1:k-1}|y_{1:k}).
 \end{align}
 
-Jos yhtälöstä (\ref{proposal-factorization}) poimitaan ehdotusjakaumaksi ainoastaan termi $q(x_k|x_{1:k-1},y_{1:k})$ saadaan tämän avulla muodostettua hyvä approksimaatio arvoille $x_k$. Tämä on suodinongelman kannalta riittävää, koska olemme kiinnostuneita ainoastaan posteriorijakaumasta ajanhetkellä $k$ (tasoitusongelmassa tarvitsisimme koko polun $x_{1:k}$). Alla tarkastellaan edelleen Gustafssonia (2010) seuraten joitakin ehdotusjakauman valintatapoja.
+Jos yhtälöstä (\ref{proposal-factorization}) poimitaan ehdotusjakaumaksi ainoastaan termi $q(x_k|x_{1:k-1},y_{1:k})$ saadaan tämän avulla muodostettua hyvä approksimaatio arvoille $x_k$. Tämä on suodinongelman kannalta riittävää, koska olemme kiinnostuneita ainoastaan posteriorijakaumasta ajanhetkellä $k$ (tasoitusongelmassa tarvitsisimme koko polun $x_{1:k}$). Alla tarkastellaan edelleen Gustafssonia (2010) seuraten kahta ehdotusjakauman valintatapaa, prioriotantaa (prior sampling) sekä uskottavuusotantaa (likelihood sampling).
+
+Ennen otannan tarkastelua määritellään mallille signaali-kohinasuhde uskottavuuden maksimin ja priorin maksimin välisenä suhteena
+
+\begin{align}\label{SNR}
+\text{SNR}\propto \frac{\text{max}_{x_k}p(y_k|x_k)}{\text{max}_{x_k}p(x_k|x_{k-1})}. 
+\end{align}
+
+Kun suhde (\ref{SNR}) on matala, on prioriotanta luonnollinen valinta. Tässä käytetään ehdotusjakauman tilavektorin ehdollista prioria eli
+
+\begin{align}\label{prioriotanta-q}
+q(x_k|x_{1:k-1},y_{k})=p(x_k|x^i_{k-1}).
+\end{align}
+
+Kun taas signaali-kohinasuhde on kohtalainen tai korkea, on parempi käyttää ehdotusjakaumana skaalattua uskottavuusfunktiota
+
+\begin{align}\label{uskottavuusotanta-q}
+q(x_k|x_{1:k-1},y_{k}) \propto p(y_k|x_k).
+\end{align}
+
+Tässä tapauksessa vaaditaan lisäksi, että uskottavuusfunktio on integroituva.
 
 ## Algoritmi
 
-Alla esitetään SMC-algoritmi Bayesilaisen, epälineaarisen suodinongelman ratkaisemiseksi. Kun uudelleenotanta tehdään jokaisella algoritmin iteraatiolla, on kyseessä SIR-algoritmi. Kun uudelleenotanta tehdään esimerkiksi edellisessä alaluvussa kuvatun kynnysarvoehdon $\hat{N}_{eff}< N_{th}$ täyttessä, on kyseessä SIS-algoritmi. Algoritmin kuvauksessa käytetään notaatiota $x_k^i$, joka tarkoittaa, että tila $x_k$ käy ajanhetkellä $k$ gridin pisteessä $x^i$. Notaatiota tarvitaan, koska SMC-algoritmin läpikäymä gridi muuttuu ajan funktiona.
+Alla esitetään hiukassuodin-SMC-algoritmi Bayesilaisen, epälineaarisen suodinongelman ratkaisemiseksi. Kun uudelleenotanta tehdään jokaisella algoritmin iteraatiolla, on kyseessä SIR-algoritmi. Kun uudelleenotanta tehdään esimerkiksi edellisessä alaluvussa kuvatun kynnysarvoehdon $\hat{N}_{eff}< N_{th}$ täyttessä, on kyseessä SIS-algoritmi. Algoritmin kuvauksessa käytetään notaatiota $x_k^i$, joka tarkoittaa, että tila $x_k$ käy ajanhetkellä $k$ gridin pisteessä $x^i$. Notaatiota tarvitaan, koska SMC-algoritmin läpikäymä gridi muuttuu ajan funktiona.
 
 \begin{algorithm}
 \DontPrintSemicolon
 \KwData{Generoidaan $x_1^i\sim p_{x_0}$ missä $i=1,\ldots,N$ ja jokainen partikkeli saa saman painon $w_{1|0}^i=1/N$.}
-\KwResult{Posteriorijakauma $x_{k+1}^i$.}
+\KwResult{Posteriorijakauma $p(x_{1:k}|y_{1:k})$.}
 \Begin{
   \For{$k=1,2,\ldots,t$}{
     \For{$i=1,2,\ldots,N$}{
@@ -165,8 +185,8 @@ Alla esitetään SMC-algoritmi Bayesilaisen, epälineaarisen suodinongelman ratk
       \Begin{Estimoidaan $p$. \newline Lasketaan tiheydelle approksimaatio $\hat{p}(x_{1:k}|y_{1:k})=\sum_{i=1}^{N}w_{k|k}^i \delta(x_{1:k}-x_{1:k}^i)$, \newline
       missä $\delta(x)$ on Diracin deltafunktio.}
       \Begin{Lasketaan efektiivinen otoskoko $\hat{N}_{eff}=\frac{1}{\sum_i(w^i_{k|k})^2}$.}
-      \If{$\hat{N}_{eff}< N_{th}$}{Otetaan uudet $N$ otosta palauttaen joukosta $\{x_{1:k}^i\}_{i=1}^N$, missä otoksen $i$ todennäköisyys on $w^i_{k|k}$.}
-      \If{$\k < t$}{Aikapäivitys. \newline Luodaan ennusteet partikkeleille ehdotusjakaumasta $x_{k+1}^i\sim q(x_{k+1}|x_k^i,y_{k+1})$, \newline päivitetään partikkelien painot tärkeytysotannalla sen mukaan kuinka todennäköisiä partikkelien ennusteet ovat $w_{k+1|k}^i=w_{k|k}^i\frac{p(x_{k+1}^i|x_k^i)}{q(x_{k+1}^i|x_k^i,y_{k+1})}$.}
+      \If{$\hat{N}_{eff}< N_{th}$}{\Begin{Otetaan uudet $N$ otosta palauttaen joukosta $\{x_{1:k}^i\}_{i=1}^N$, missä otoksen $i$ todennäköisyys on $w^i_{k|k}$.}}
+      \If{$k < t$}{\Begin{Aikapäivitys. \newline Luodaan ennusteet partikkeleille ehdotusjakaumasta $x_{k+1}^i\sim q(x_{k+1}|x_k^i,y_{k+1})$, \newline päivitetään partikkelien painot tärkeytysotannalla sen mukaan kuinka todennäköisiä partikkelien ennusteet ovat $w_{k+1|k}^i=w_{k|k}^i\frac{p(x_{k+1}^i|x_k^i)}{q(x_{k+1}^i|x_k^i,y_{k+1})}$.}}
     } 
   }  
 }
@@ -179,7 +199,7 @@ Kun $N \rightarrow \infty$ algoritmille pätee $\hat{p}(x_{1:k}|y_{1:k}) \xright
 
 ## Marginaalijakauma
 
-Edellä kuvattu algoritmi tuottaa approksimaation koko prosessin posteriorijakaumalle $p(x_{1:k}|y_{1:k})$. Jos halutaan tietää ainoastaan posteriorijakauman $p(x_k|y_{1:k})$ estimaatti, voidaan käyttää ainoastaan viimeisestä tilasta $x_k^i$ laskettua estimaattia 
+Edellä kuvattu algoritmi 1 tuottaa approksimaation koko prosessin posteriorijakaumalle $p(x_{1:k}|y_{1:k})$. Jos halutaan tietää ainoastaan posteriorijakauman $p(x_k|y_{1:k})$ estimaatti, voidaan käyttää ainoastaan viimeisestä tilasta $x_k^i$ laskettua estimaattia 
 
 $$
 \hat{p}(x_{k}|y_{1:k})=\sum_{i=1}^{N}w_{k|k}^i \delta(x_{k}-x_{k}^i).
@@ -195,11 +215,25 @@ yllä esitetyn sijaan. Tällöin jokaisessa aikapäivitysaskeleessa lasketaan pa
 
 ## Aikakompleksisuus
 
-Marginalisointi edellä esitetyllä tärkeytyspainolla lisää algoritmin aikakompleksisuutta $\mathcal{O}(N)\rightarrow\mathcal{O}(N^2)$, joten isoilla arvoilla $N$ pitää käyttää jotakin toista versiota algoritmista. Esimerkiksi $\mathcal{O}(N\text{log}(N))$ versio tästä marginaalihiukkassuotimesta on olemassa.
+Algoritmin perusmuodon aikakompleksisuus on $\mathcal{O}(N)$. Marginalisointi edellä esitetyllä tärkeytyspainolla lisää algoritmin aikakompleksisuutta $\mathcal{O}(N)\rightarrow\mathcal{O}(N^2)$, koska jokaisen partikkelin kohdalla painot lasketaan jokaisen tila-aika-avaruuspolun yli. On selvää, että erityisesti isoilla otoskoon $N$ arvoilla ei yllä esitetty marginalisointi enää ole mielekästä. Alla esitetään vielä $\mathcal{O}(N\text{log}(N))$ versio marginaalihiukkassuotimesta.
+
+
 
 # Paikannusesimerkki
 
-Esimerkissä analysoidaan ja vertaillaan algoritmin eri versioiden suorituskykyä. Esimerkkidatana käytetään Walkbasen XR-2 MITÄ. The sensor is being built around the BLE5.1 angle of arrival (AoA) specifications, enabling it to produce sub meter positioning results. Seitsemän sensoria sekä 25 paikannustagista koostuva testilaite. Riippuen päällä olevien paikannustagien lukumäärästä, tuottaa n. havainto sekunnissa. Jokainen havainto koostuu seuraavista muuttujista:
+Esimerkissä analysoidaan ja vertaillaan algoritmin eri versioiden suorituskykyä. Esimerkkidatana käytetään AOA-havaintoja seitsemän vastaanottimen sekä XXX lähettimen välillä. Vastaanottimina toimivat Walkbase XR-2 -sensorit, jotka MITÄ. The sensor is being built around the BLE5.1 angle of arrival (AoA) specifications, enabling it to produce sub meter positioning results. Lähettimenä toimi 25 Bluetooth-paikannustagista koostuva Walkbase Foculator -testilaite. 
+
+## Datan kuvaus
+
+Riippuen päällä olevien paikannustagien lukumäärästä, tuottaa n. havainto sekunnissa. Jokainen havainto koostuu seuraavista muuttujista. 
+
+## Koeasetelma
+
+Dataa kerättiin. Data kerättiin yöaikaan, jolloin toimiston käyttöaste oli minimissä. Tällä minimoitiin radiosignaalin tielle osuvien ihmisten vaikutus tuloksiin.
+
+## Algoritmi
+
+## Tulokset
 
 # Lopuksi
 
@@ -214,5 +248,6 @@ Tässä tutkielmassa on esitetty pääpiirteittäin ... ja lisäksi tarkasteltu 
 - Gustafsson (2010): **Particle Filter Theory and
 Practice with Positioning
 Applications**. [https://ieeexplore.ieee.org/document/5546308](https://ieeexplore.ieee.org/document/5546308).
+- Petris, Petrone & Campagnoli (2009): **Dynamic Linear Models with R**. Springer.
 - Särkkä (2013): **Bayesian Filtering and Smoothing.** Cambridge University Press.
 [https://users.aalto.fi/~ssarkka/pub/cup_book_online_20131111.pdf](https://users.aalto.fi/~ssarkka/pub/cup_book_online_20131111.pdf).
