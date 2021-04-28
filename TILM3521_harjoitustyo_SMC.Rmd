@@ -9,6 +9,7 @@ header-includes:
    - \usepackage{tikz-cd}
    - \usepackage{mathtools}
    - \usepackage{pict2e}
+   - \usepackage[ruled,vlined]{algorithm2e} 
    - \usetikzlibrary{shapes.geometric,arrows}
    - \def\TikZ{Ti\emph{k}Z\ }
 urlcolor: blue   
@@ -153,47 +154,24 @@ Jos yhtälöstä (\ref{proposal-factorization}) poimitaan ehdotusjakaumaksi aino
 
 Alla esitetään SMC-algoritmi Bayesilaisen, epälineaarisen suodinongelman ratkaisemiseksi. Kun uudelleenotanta tehdään jokaisella algoritmin iteraatiolla, on kyseessä SIR-algoritmi. Kun uudelleenotanta tehdään esimerkiksi edellisessä alaluvussa kuvatun kynnysarvoehdon $\hat{N}_{eff}< N_{th}$ täyttessä, on kyseessä SIS-algoritmi. Algoritmin kuvauksessa käytetään notaatiota $x_k^i$, joka tarkoittaa, että tila $x_k$ käy ajanhetkellä $k$ gridin pisteessä $x^i$. Notaatiota tarvitaan, koska SMC-algoritmin läpikäymä gridi muuttuu ajan funktiona.
 
-**Alustus:** Generoidaan $x_1^i\sim p_{x_0}$ missä $i=1,\ldots,N$ ja jokainen partikkeli saa saman painon $w_{1|0}^i=1/N$.
-
-Jokaiselle ajanhetkelle $k=1,2,\ldots,t$ toistetaan seuraava laskenta.
-
-**Vaihe 1:** Päivitetään havainnot. Jokaiselle partikkelille $i=1,2,\ldots,N$ lasketaan painot
-
-$$
-w_{k|k}^i=\frac{1}{c_k}w_{k|{k-1}}^ip(y_k|x_k^i),
-$$
-
-missä normalisointipaino on
-
-$$
-c_k=\sum_{i=1}^{N}w_{k|{k-1}}^ip(y_k|x_k^i).
-$$
-
-**Vaihe 2:** Estimoidaan $p$. Lasketaan tiheydelle approksimaatio
-
-$$
-\hat{p}(x_{1:k}|y_{1:k})=\sum_{i=1}^{N}w_{k|k}^i \delta(x_{1:k}-x_{1:k}^i),
-$$
-
-missä $\delta(x)$ on Diracin deltafunktio.
-
-**Vaihe 3:** Valinnainen uudelleenotanta. Otetaan uudet $N$ otosta palauttaen joukosta $\{x_{1:k}^i\}_{i=1}^N$, missä otoksen $i$ todennäköisyys on $w^i_{k|k}$.
-
-Uudelleenotantaa tarvitaan, koska ilman sitä painot alkavat keskittyä muutaman ajanhetken jälkeen tietyille partikkeleille. Uudelleenotantaa ei kuitenkaan kannata aloittaa liian aikaisin, koska se lisää satunnaisotannan epävarmuutta. 
-
-**Vaihe 4:** Aikapäivitys, jos $k < t$. Luodaan ennusteet partikkeleille ehdotusjakaumasta
-
-$$
-x_{k+1}^i\sim q(x_{k+1}|x_k^i,y_{k+1})
-$$
-
-ja päivitetään myös partikkelien painot tärkeytysotannalla sen mukaan kuinka todennäköisiä partikkelien ennusteet ovat
-
-$$
-w_{k+1|k}^i=w_{k|k}^i\frac{p(x_{k+1}^i|x_k^i)}{q(x_{k+1}^i|x_k^i,y_{k+1})}.
-$$
-
-Palataan takaisin **vaiheeseen 1**. Jatketaan kunnes $k=t$. 
+\begin{algorithm}
+\DontPrintSemicolon
+\KwData{Generoidaan $x_1^i\sim p_{x_0}$ missä $i=1,\ldots,N$ ja jokainen partikkeli saa saman painon $w_{1|0}^i=1/N$.}
+\KwResult{Posteriorijakauma $x_{k+1}^i$.}
+\Begin{
+  \For{$k=1,2,\ldots,t$}{
+    \For{$i=1,2,\ldots,N$}{
+      \Begin{Päivitetään painot. $w_{k|k}^i=\frac{1}{c_k}w_{k|{k-1}}^ip(y_k|x_k^i)$, \newline missä normalisointipaino on $c_k=\sum_{i=1}^{N}w_{k|{k-1}}^ip(y_k|x_k^i).$}
+      \Begin{Estimoidaan $p$. \newline Lasketaan tiheydelle approksimaatio $\hat{p}(x_{1:k}|y_{1:k})=\sum_{i=1}^{N}w_{k|k}^i \delta(x_{1:k}-x_{1:k}^i)$, \newline
+      missä $\delta(x)$ on Diracin deltafunktio.}
+      \Begin{Lasketaan efektiivinen otoskoko $\hat{N}_{eff}=\frac{1}{\sum_i(w^i_{k|k})^2}$.}
+      \If{$\hat{N}_{eff}< N_{th}$}{Otetaan uudet $N$ otosta palauttaen joukosta $\{x_{1:k}^i\}_{i=1}^N$, missä otoksen $i$ todennäköisyys on $w^i_{k|k}$.}
+      \If{$\k < t$}{Aikapäivitys. \newline Luodaan ennusteet partikkeleille ehdotusjakaumasta $x_{k+1}^i\sim q(x_{k+1}|x_k^i,y_{k+1})$, \newline päivitetään partikkelien painot tärkeytysotannalla sen mukaan kuinka todennäköisiä partikkelien ennusteet ovat $w_{k+1|k}^i=w_{k|k}^i\frac{p(x_{k+1}^i|x_k^i)}{q(x_{k+1}^i|x_k^i,y_{k+1})}$.}
+    } 
+  }  
+}
+\caption{Hiukassuodin}
+\end{algorithm}
 
 ## Konvergenssituloksia
 
@@ -229,13 +207,12 @@ Tässä tutkielmassa on esitetty pääpiirteittäin ... ja lisäksi tarkasteltu 
 
 # Lähteet    
 
-- Dahlin & Schön (2019): **Getting Started with Particle Metropolis-Hastings
-for Inference in Nonlinear Dynamical Models**. [https://arxiv.org/pdf/1511.01707.pdf](https://arxiv.org/pdf/1511.01707.pdf).
+- Chen & Liu (1998): **Sequential Monte Carlo Methods for Dynamic Systems**. [http://stat.rutgers.edu/home/rongchen/publications/98JASA_SMC.pdf](http://stat.rutgers.edu/home/rongchen/publications/98JASA_SMC.pdf)
+- Dahlin & Schön (2019): **Getting Started with Particle Metropolis-Hastings for Inference in Nonlinear Dynamical Models**. [https://arxiv.org/pdf/1511.01707.pdf](https://arxiv.org/pdf/1511.01707.pdf).
+- Del Moral (1996): **Nonlinear Filtering: Interacting Particle Resolution**. [https://people.bordeaux.inria.fr/pierre.delmoral/delmoral96nonlinear.pdf](https://people.bordeaux.inria.fr/pierre.delmoral/delmoral96nonlinear.pdf).
 - Gordon, Salmond & Smith (1993): **Novel approach to nonlinear/non-Gaussian Bayesian state estimation**. [http://www.irisa.fr/aspi/legland/ref/gordon93a.pdf](http://www.irisa.fr/aspi/legland/ref/gordon93a.pdf).
 - Gustafsson (2010): **Particle Filter Theory and
 Practice with Positioning
 Applications**. [https://ieeexplore.ieee.org/document/5546308](https://ieeexplore.ieee.org/document/5546308).
 - Särkkä (2013): **Bayesian Filtering and Smoothing.** Cambridge University Press.
 [https://users.aalto.fi/~ssarkka/pub/cup_book_online_20131111.pdf](https://users.aalto.fi/~ssarkka/pub/cup_book_online_20131111.pdf).
-
-Del Moral artikkelissa "Nonlinear Filtering: Interacting Particle Resolution" (1996), SMC-menetelmät termiä Liu ja Chen artikkelissa "Sequential Monte Carlo Methods for Dynamic Systems" (1998).
