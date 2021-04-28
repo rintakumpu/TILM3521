@@ -97,9 +97,9 @@ Rekursion avulla voidaan laskea $p(x_k|y_{1:k})$ käymällä rekursio läpi $k$ 
 
 # Hiukassuodin-algoritmi
 
-Tässä luvussa esitetään algoritmi, joka hyödyntää luvussa 2. kuvattua Bayesilaista suodinta epälineaarisen suodinongelman ratkaisemiseen. Ennen varsinaista algoritmia käsitellään uudelleenotantamenetelmän, partikkelien määrän / otoskoon ja ehdotusjakauman valinnasta koostuva algoritmin alustus. Lopuksi esiteetään algoritmin konvergenssia, marginaalijakaumaa sekä aikakompleksisuutta koskevia tuloksia. Esitetty algoritmi perustuu Fredrik Gustafssonin artikkeliin "Particle Filter Theory and Practice with Positioning Applications" (2010).
+Tässä luvussa esitetään algoritmi, joka hyödyntää luvussa 2. kuvattua Bayesilaista suodinta epälineaarisen suodinongelman ratkaisemiseen. Ennen varsinaista algoritmia käsitellään algoritmiin liittyvän uudelleenotantamenetelmän, partikkelien määrän / otoskoon ja ehdotusjakauman valinta. Lopuksi esiteetään algoritmin konvergenssia, marginaalijakaumaa sekä aikakompleksisuutta koskevia tuloksia. Esitetty algoritmi perustuu Fredrik Gustafssonin artikkeliin "Particle Filter Theory and Practice with Positioning Applications" (2010).
 
-## Algoritmin alustus
+## Parametrien valinta
 
 Ennen algoritmin suorittamista valitaan ehdotusjakauma $q(x_{k+1}|x_{1:k},y_{k+1})$, uudelleenotantamenetelmä sekä partikkelien määrä $N$. LYHYT KUVAUS kaikista.
 
@@ -107,9 +107,28 @@ Ennen algoritmin suorittamista valitaan ehdotusjakauma $q(x_{k+1}|x_{1:k},y_{k+1
 
 ### Uudelleenotantamenetelmän valinta
 
+Ilman uudelleenotantaa on todennäköistä, että algoritmi alkaa kärsiä otosten ehtymisestä. Toisin sanoen kaikki painot alkavat keskittyä vain muutamalle havainnolle. Uudelleenotanta tarjoaa osittaisen ratkaisun tähän ongelmaan, mutta hävittää samalla informaatiota ja siten lisää satunnaisotantaan liittyvää epävarmuutta. Yleisesti ottaen kannattaa uudelleenotanta aloittaa vasta siinä vaiheessa algoritmin suorittamista, kun siitä on otosten ehtymisen kannalta hyötyä.
+
+Alla esitetty algoritmi käyttää SIR-uudelleenotantaa (sampling importance resampling), jossa uudellenotanta suoritetaan jokaisella algoritmin läpikäynnillä. Vaihtoehtona on hyödyntää tärkeytysotantaa ja suorittaa uudelleenotanta ainoastaan, kun otoskoon ehtymisen mittarina käytettävä efektiivinen otoskoko painuu jonkin kynnysarvon alapuolelle. Tätä kutsutaan SIS-uudelleenotannaksi (sampling importance sampling).
+
+Efektiivinen otoskoko saadaan laskettua variaatiokertoimesta $c_\nu$ lasketaan kaavalla
+
+\begin{align}
+N_{eff}= \frac{N}{1+c_\nu^2(w^i_{k|k})} = \frac{N}{1+\frac{\text{Var}(w^i_{k|k})}{(\mathbb{E}[w^i_{k|k}])^2}} =\frac{N}{1+N^2\text{Var}(w^i_{k|k})}.
+\end{align}
+
+Tästä saadaan effektiiviselle otoskoolle laskennallinen approksimaatio
+
+\begin{align}
+\hat{N}_{eff}=\frac{1}{\sum_i(w^i_{k|k})^2}.
+\end{align}
+
+Approksimaatiolle pätee JOSSA yläraja.
+Tästä saadaan määriteltyä algoritmille SIS-uudelleenotantaehto $\hat{N}_{eff}< N_{th}$. Gustafsson (2010) esittää uudelleenotannan kynnysarvoksi esimerkiksi $\hat{N}_{th}=2N/3$.
+
 ### Ehdotusjakauman valinta
 
-Ehdotusjakauman valintaa ei käsitellä tässä, mutta valinta voidaan tehdä optimaalisesti. Yksinkertaisin valinta on $q(x_{k+1}|x_{1:k},y_{k+1})=p(x_{k+1}|x_{1:k})$.
+Yksinkertaisin valinta ehdotusjakaumalle on $q(x_{k+1}|x_{1:k},y_{k+1})=p(x_{k+1}|x_{1:k})$. Ehdotusjakauman valintaa ei käsitellä tässä, mutta valinta voidaan tehdä optimaalisesti. 
 
 ## Algoritmi
 
