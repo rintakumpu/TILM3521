@@ -61,13 +61,15 @@ Ongelmassa tiedämme, miten havaitut muuttujat kytkeytyvät "piilossa oleviin" m
 
 Näin määritettyjen mallien avulla SMC-menetelmät estimoivat sekventiaalisesti tilojen $X_k$ arvot minä hyvänsä ajan hetkellä $k$, kun ainoastaan prosessi $Y_1, \ldots, Y_k$ tunnetaan. Estimaatit saadaan posteriorijakaumasta $p(x_k | y_1,y_2,\ldots, y_k)$, jonka approksimaatio muodostetaan Bayesilaisittain  havaintojen pohjalta. Kuten mainittua ei *** tarvitse OLLA LINEAARINEN. SMC-menetelmissä stokastisen prosessin posteriorijakauman esittämiseen käytettyjä otoksia kutsutaan myös partikkeleiksi.
 
+SUODINongelmaa lähellä on myös ns. s (*smoothing problem*), jossa ollaan kiinnostuneita. Tämä tutkielma keskittyy yksin suodinongelman ratkaisemiseen.
+
 ## Historiaa
 
 Lineaarisen suodinongelman ratkaisun ... . 
 
 Epälineaariselle ei-Gaussilaiselle mallille ...Muita vaihtoehtoja ovat EKF, UKF, QKF.
 
-Ensimmäisen epälineaarisen suodinongelman Bayesilaisen/MC-ratkaisun esittivät Gordon, Salmond ja Smith artikkelissaan "Novel approach to nonlinear/non-Gaussian Bayesian state estimation" (1993). Gordonin, Salmondin ja Smithin ratkaisu eroaa notaatioltaan hieman tässä tutkielmassa esitetystä, mutta on olennaisesti sama. Suurin ero tämän tutkielman SMC-algoritmin sekä alkuperäisen SMC-algoritmin välillä on XXX. Artikkelissa ratkaisu kulki nimellä "bootstrap filter", saapasremmisuodin. MIKSI Termiä hiukkassuodin käytti ensimmäisen kerran Del Moral artikkelissa "Nonlinear Filtering: Interacting Particle Resolution" (1996), SMC-menetelmät termiä Liu ja Chen artikkelissa "Sequential Monte Carlo Methods for Dynamic Systems" (1998). Tässä tutkielmassa pyritään korostamaan suotimien yhteyttä Monte Carlo -algoritmeihin ja käytetään siksi termiä SMC-menetelmät.
+Ensimmäisen epälineaarisen suodinongelman Bayesilaisen/MC-ratkaisun esittivät Gordon, Salmond ja Smith artikkelissaan "Novel approach to nonlinear/non-Gaussian Bayesian state estimation" (1993). Gordonin, Salmondin ja Smithin ratkaisu eroaa notaatioltaan hieman tässä tutkielmassa esitetystä, mutta on olennaisesti sama. Suurin ero tämän tutkielman SMC-algoritmin sekä alkuperäisen SMC-algoritmin välillä on XXX. Artikkelissa ratkaisu kulki nimellä "bootstrap filter", saapasremmisuodin. MIKSI Termiä hiukkassuodin käytti ensimmäisen kerran Del Moral artikkelissa "Nonlinear Filtering: Interacting Particle Resolution" (1996), SMC-menetelmät termiä Liu ja Chen artikkelissa "Sequential Monte Carlo Methods for Dynamic Systems" (1998). Tässä tutkielmassa pyritään korostamaan suotimien yhteyttä Monte Carlo -algoritmeihin ja käytetään siksi termiä SMC-menetelmät. Poikkeuksen tähän tekee varsinainen esitetty algoritmi, jota kutsutaan tutkielmassa hiukkassuodin-algoritmiksi.
 
 # Bayesilainen suodin
 
@@ -101,38 +103,55 @@ Tässä luvussa esitetään algoritmi, joka hyödyntää luvussa 2. kuvattua Bay
 
 ## Parametrien valinta
 
-Ennen algoritmin suorittamista valitaan ehdotusjakauma $q(x_{k+1}|x_{1:k},y_{k+1})$, uudelleenotantamenetelmä sekä partikkelien määrä $N$. LYHYT KUVAUS kaikista.
+Ennen algoritmin suorittamista valitaan ehdotusjakauma $q(x_{k+1}|x_{1:k},y_{k+1})$, uudelleenotantamenetelmä sekä partikkelien määrä $N$. Ehdotusjakauman ja uudelleenotantamenetelmän valinnassa tärkeimpänä päämääränä on välttää otosten ehtymistä, kun taas partikkelien määrä säätelee kompromissia algoritmin suorituskyvyn ja tarkkuuden välillä.
 
 ### Otoskoon $N$ valinta
 
+Yleispätevää sääntöä otoskoon/partikkelien lukumäärän $N$ valinnalle on vaikeaa antaa, sillä vaadittava estimointitarkkuus riippuu usein käsillä olevasta ongelmasta. Gordon &al. (1993) esittävät kuitenkin kolme tekijää, jotka vaikuttavat partikkelien lukumäärän valintaan
+
+a. tila-avaruuden ulottuvuuksien lukumäärä ${n_x}$,
+b. tyypillinen päällekäisyys priorin ja uskottavuuden välillä
+c. sekä tarvittava aika-askeleiden lukumäärä.
+
+Ensimmäisen tekijän vaikutus on selvä. Mitä useammassa ulottuvuudessa otantaa tarvitsee tehdä, sen korkeammaksi on $N$ asetettava, jotta jokainen ulottuvuus pystytään kattamaan. Tekijät (*b*) ja (*c*) puolestaan seuraavat uudelleenotannasta. Jos se osa tila-avaruutta, jossa uskottavuus $p(y_k|x_k)$ saa merkittäviä arvoja on pieni verrattuna siihen osaan, jossa priorijakauma $p(x_k|y_{1:k-1})$ saa merkittäviä arvoja, suuri osa partikkeleista saa pieniä painoja eivätkä näin valikoidu uudelleenotantaan. 
+
+Yleisesti ottaen $N$ kannattaa asettaa sellaiseksi, että se paitsi tuottaa riittävän tarkan estimaatin, on se käytettävissä olevan laskentatehon sekä vaadittavan laskentanopeuden kannalta järkevää. Tähän palataan tutkielman lopuksi empiirisessä paikannusesimerkissä.
+
 ### Uudelleenotantamenetelmän valinta
 
-Ilman uudelleenotantaa on todennäköistä, että algoritmi alkaa kärsiä otosten ehtymisestä. Toisin sanoen kaikki painot alkavat keskittyä vain muutamalle havainnolle. Uudelleenotanta tarjoaa osittaisen ratkaisun tähän ongelmaan, mutta hävittää samalla informaatiota ja siten lisää satunnaisotantaan liittyvää epävarmuutta. Yleisesti ottaen kannattaa uudelleenotanta aloittaa vasta siinä vaiheessa algoritmin suorittamista, kun siitä on otosten ehtymisen kannalta hyötyä.
+Ilman uudelleenotantaa on todennäköistä, että algoritmi alkaa kärsiä otosten ehtymisestä. Toisin sanoen kaikki painot alkavat keskittyä vain muutamalle havainnolle. Uudelleenotanta tarjoaa osittaisen ratkaisun tähän ongelmaan, mutta hävittää samalla informaatiota ja siten lisää satunnaisotantaan liittyvää epävarmuutta. Yleisesti ottaen kannattaa uudelleenotanta aloittaa vasta siinä vaiheessa algoritmin suorittamista, kun siitä on otosten ehtymisen kannalta hyötyä. 
 
-Alla esitetty algoritmi käyttää SIR-uudelleenotantaa (sampling importance resampling), jossa uudellenotanta suoritetaan jokaisella algoritmin läpikäynnillä. Vaihtoehtona on hyödyntää tärkeytysotantaa ja suorittaa uudelleenotanta ainoastaan, kun otoskoon ehtymisen mittarina käytettävä efektiivinen otoskoko painuu jonkin kynnysarvon alapuolelle. Tätä kutsutaan SIS-uudelleenotannaksi (sampling importance sampling).
+Jos alla esitetyssä algoritmissa uudelleenotanta suoritetaan jokaisella algoritmin läpikäynnillä on kyseessä ns. SIR-algoritmi (sampling importance resampling). Vaihtoehtona on hyödyntää tärkeytysotantaa ja suorittaa uudelleenotanta ainoastaan, kun otoskoon ehtymisen mittarina käytettävä efektiivinen otoskoko painuu jonkin kynnysarvon alapuolelle. Tätä kutsutaan SIS-algoritmiksi (sampling importance sampling).
 
 Efektiivinen otoskoko saadaan laskettua variaatiokertoimesta $c_\nu$ lasketaan kaavalla
 
-\begin{align}
+\begin{align}\label{N-eff}
 N_{eff}= \frac{N}{1+c_\nu^2(w^i_{k|k})} = \frac{N}{1+\frac{\text{Var}(w^i_{k|k})}{(\mathbb{E}[w^i_{k|k}])^2}} =\frac{N}{1+N^2\text{Var}(w^i_{k|k})}.
 \end{align}
 
-Tästä saadaan effektiiviselle otoskoolle laskennallinen approksimaatio
+Näin laskettu efektiivinen otoskoko maksimoituu ($N_{eff}=N$), kun kaikille painoille pätee $w^i_{k|k}=1/N$ ja minimoituu ($N_{eff}=1$), kun $w^i_{k|k}=1$ todennäköisyydellä $1/N$ ja $w^i_{k|k}=0$ todennäköisyydellä $(N-1)/N$. Tästä saadaan effektiiviselle otoskoolle laskennallinen approksimaatio
 
-\begin{align}
+\begin{align}\label{N-hat-eff}
 \hat{N}_{eff}=\frac{1}{\sum_i(w^i_{k|k})^2}.
 \end{align}
 
-Approksimaatiolle pätee JOSSA yläraja.
-Tästä saadaan määriteltyä algoritmille SIS-uudelleenotantaehto $\hat{N}_{eff}< N_{th}$. Gustafsson (2010) esittää uudelleenotannan kynnysarvoksi esimerkiksi $\hat{N}_{th}=2N/3$.
+Sekä määritelmälle ($\ref{N-eff}$) että ($\ref{N-hat-eff}$) pätee $1 \leq \hat{N}_{eff} \leq N$. Yläraja saavutetaan, kun jokaisen partikkelin paino on sama. Alarajalle puolestaan päädytään, kun kaikki paino päätyy yksittäiselle partikkelille. Tästä saadaan määriteltyä algoritmille SIS-uudelleenotantaehto $\hat{N}_{eff}< N_{th}$. Gustafsson (2010) esittää uudelleenotannan kynnysarvoksi esimerkiksi $\hat{N}_{th}=2N/3$. 
+
+Uudelleenotanta ei muuta approksimoitavan jakauma $p$ odotusarvoa, mutta se lisää jakauman Monte Carlo -varianssia. On kuitenkin olemassa uudelleenotantamenetelmiä, jotka pyrkivät minimoimaan tämän varianssin lisäyksen. Varianssitarkastelu jätetään tämän tutkielman ulkopuolelle. 
 
 ### Ehdotusjakauman valinta
 
-Yksinkertaisin valinta ehdotusjakaumalle on $q(x_{k+1}|x_{1:k},y_{k+1})=p(x_{k+1}|x_{1:k})$. Ehdotusjakauman valintaa ei käsitellä tässä, mutta valinta voidaan tehdä optimaalisesti. 
+Yksinkertaisin valinta ehdotusjakaumalle on $q(x_{1:k}|y_{1:k})$ eli toisin sanoen jokaisella algoritmin suorituskerralla käydään läpi koko polku $1:k$. Tämä ei kuitenkaan ole tarkoituksenmukaista, erityisesti jos kyseessä on reaaliaikainen sovellutus. Kirjoitetaan tämä ehdotusjakauma nyt muodossa
+
+\begin{align}\label{proposal-factorization}
+q(x_{1:k}|y_{1:k})=q(x_k|x_{1:k-1},y_{1:k})q(x_{1:k-1}|y_{1:k}).
+\end{align}
+
+Jos yhtälöstä (\ref{proposal-factorization}) poimitaan ehdotusjakaumaksi ainoastaan termi $q(x_k|x_{1:k-1},y_{1:k})$ saadaan tämän avulla muodostettua hyvä approksimaatio arvoille $x_k$. Tämä on suodinongelman kannalta riittävää, koska olemme kiinnostuneita ainoastaan posteriorijakaumasta ajanhetkellä $k$ (tasoitusongelmassa tarvitsisimme koko polun $x_{1:k}$). Alla tarkastellaan edelleen Gustafssonia (2010) seuraten joitakin ehdotusjakauman valintatapoja.
 
 ## Algoritmi
 
-Alla käytetään notaatiota $x_k^i$, joka tarkoittaa, että tila $x_k$ käy ajanhetkellä $k$ gridin pisteessä $x^i$. Notaatiota tarvitaan, koska hiukkassuotimessa läpikäytävä gridi muuttuu ajan funktiona.
+Alla esitetään SMC-algoritmi Bayesilaisen, epälineaarisen suodinongelman ratkaisemiseksi. Kun uudelleenotanta tehdään jokaisella algoritmin iteraatiolla, on kyseessä SIR-algoritmi. Kun uudelleenotanta tehdään esimerkiksi edellisessä alaluvussa kuvatun kynnysarvoehdon $\hat{N}_{eff}< N_{th}$ täyttessä, on kyseessä SIS-algoritmi. Algoritmin kuvauksessa käytetään notaatiota $x_k^i$, joka tarkoittaa, että tila $x_k$ käy ajanhetkellä $k$ gridin pisteessä $x^i$. Notaatiota tarvitaan, koska SMC-algoritmin läpikäymä gridi muuttuu ajan funktiona.
 
 **Alustus:** Generoidaan $x_1^i\sim p_{x_0}$ missä $i=1,\ldots,N$ ja jokainen partikkeli saa saman painon $w_{1|0}^i=1/N$.
 
@@ -176,8 +195,7 @@ $$
 
 Palataan takaisin **vaiheeseen 1**. Jatketaan kunnes $k=t$. 
 
-
-## Asymptotiikkaa
+## Konvergenssituloksia
 
 Kun $N \rightarrow \infty$ algoritmille pätee $\hat{p}(x_{1:k}|y_{1:k}) \xrightarrow{a.s.} p(x_{1:k}|y_{1:k})$.
 
@@ -199,13 +217,15 @@ yllä esitetyn sijaan. Tällöin jokaisessa aikapäivitysaskeleessa lasketaan pa
 
 ## Aikakompleksisuus
 
-Marginaloisointi edellä esitetyllä tärkeytyspainolla lisää algoritmin aikakompleksisuutta $\mathcal{O}(N)\rightarrow\mathcal{O}(N^2)$, joten isoilla arvoilla $N$ pitää käyttää jotakin toista versiota algoritmista. Esimerkiksi $\mathcal{O}(N\text{log}(N))$ versio tästä marginaalihiukkassuotimesta on olemassa.
+Marginalisointi edellä esitetyllä tärkeytyspainolla lisää algoritmin aikakompleksisuutta $\mathcal{O}(N)\rightarrow\mathcal{O}(N^2)$, joten isoilla arvoilla $N$ pitää käyttää jotakin toista versiota algoritmista. Esimerkiksi $\mathcal{O}(N\text{log}(N))$ versio tästä marginaalihiukkassuotimesta on olemassa.
 
 # Paikannusesimerkki
 
-Esimerkissä analysoidaan ja vertaillaan algoritmin eri versioiden suorituskykyä. Esimerkkidatana käytetään Walkbasen XR-2 MITÄ.
+Esimerkissä analysoidaan ja vertaillaan algoritmin eri versioiden suorituskykyä. Esimerkkidatana käytetään Walkbasen XR-2 MITÄ. The sensor is being built around the BLE5.1 angle of arrival (AoA) specifications, enabling it to produce sub meter positioning results. Seitsemän sensoria sekä 25 paikannustagista koostuva testilaite. Riippuen päällä olevien paikannustagien lukumäärästä, tuottaa n. havainto sekunnissa. Jokainen havainto koostuu seuraavista muuttujista:
 
 # Lopuksi
+
+Tässä tutkielmassa on esitetty pääpiirteittäin ... ja lisäksi tarkasteltu miten eri valinnat vaikuttavat algoritmin suorituskykyyn yksinkertaisen mutta XXX esimerkin avulla. Ei oteta kantaa esimerkiksi JATKOKYSYMYKSIÄ mahdollisuus laajentaa.
 
 # Lähteet    
 
@@ -217,3 +237,5 @@ Practice with Positioning
 Applications**. [https://ieeexplore.ieee.org/document/5546308](https://ieeexplore.ieee.org/document/5546308).
 - Särkkä (2013): **Bayesian Filtering and Smoothing.** Cambridge University Press.
 [https://users.aalto.fi/~ssarkka/pub/cup_book_online_20131111.pdf](https://users.aalto.fi/~ssarkka/pub/cup_book_online_20131111.pdf).
+
+Del Moral artikkelissa "Nonlinear Filtering: Interacting Particle Resolution" (1996), SMC-menetelmät termiä Liu ja Chen artikkelissa "Sequential Monte Carlo Methods for Dynamic Systems" (1998).
