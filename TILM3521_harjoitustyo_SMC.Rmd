@@ -238,30 +238,6 @@ Algoritmin perusmuodon aikakompleksisuus on $\mathcal{O}(N)$. Uudelleenotantamen
 
 Esimerkissä käyteteään SMC-algoritmia Bluetooth-paikannussovelluksessa paikannustarkkuuden parantamiseen. Paikannusdata kerätään toimistoympäristössä liikkuvien BLE-lähettimien sekä kattoon sijoitettujjen vastaanottimien avulla. **kerättyjä BLE5.1-standardin mukaisia signaalin tulokulmahavaintoja eli AoA-havaintoja (angle of arrival). Paikannukseen käytetään triangulaatio-algoritmia. Lopuksi esimerkissä analysoidaan ja vertaillaan algoritmin eri versioiden suorituskykyä sekä suorituskyvyn että paikannustarkkuuden näkökulmasta.
 
-## Datan kuvaus
-
-Riippuen päällä olevien paikannustagien lukumäärästä, tuottaa n. havainto sekunnissa. Jokainen havainto koostuu taulukossa \ref{tab:muuttujat} kuvatuista muuttujista.
-
-\begin{table}[hp]
-\centering
-\begin{tabular}{|l|l|l|}
-\hline
-Muuttuja & Kuvaus & Esimerkkiarvo\\
-\hline
-ts & 124 & 124\\
-asset\_tag\_mac & a & 124\\
-locator\_mac & vvv & 124\\
-rssi & vvv & 124\\
-azimuth\_angle & vvv & 124\\
-elevation\_angle & vvv & 124\\
-quality\_ant\_phase\_jitter & vvv & 124\\
-quality\_ant\_snr & vvv & 124\\
-\hline
-\end{tabular}
-\caption{Muuttujat}
-\label{tab:muuttujat}
-\end{table}
-
 ## Koeasetelma
 
 Lähettimenä toimii Lähettimenä toimi 25 Bluetooth-paikannustagista koostuva Walkbase Foculator -testilaite.
@@ -272,6 +248,42 @@ TRAJECTORY. jotka MITÄ. The sensor is being built around the BLE5.1 angle of ar
 
 Esimerkkidatana käytetään AoA-havaintoja seitsemän vastaanottimen sekä XXX lähettimen välillä.
 Dataa kerättiin. Data kerättiin yöaikaan, jolloin toimiston käyttöaste oli minimissä. Tällä minimoitiin radiosignaalin tielle osuvien ihmisten vaikutus tuloksiin.
+
+## Datan kuvaus
+
+Riippuen päällä olevien paikannustagien lukumäärästä, tuottaa n. havainto sekunnissa. Havaintoja on $N_{obs}=$ kappaletta. Jokainen havainto koostuu taulukossa \ref{tab:muuttujat} kuvatuista muuttujista.
+
+\begin{table}[hp]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+Muuttuja & Kuvaus & Esimerkkiarvo\\
+\hline
+ts & havainnon aikaleima & 21:38:20.998+00\\
+asset\_tag\_mac & lähettimen MAC-osoite & 5c:02:72:67:f7:4c\\
+locator\_mac & vastaanottimen MAC-osoite & b8:27:eb:66:0d:2a\\
+bearing & suuntimakulma $\eta$ (astetta) & 34\\
+rssi & signaalin vahvuus (dBm) & -81\\
+azimuth\_angle & atsimuuttikulma $\phi$ (astetta) & 102.7\\
+converted\_angle & napapohjoisesta laskettu kulma $\Phi$ (astetta) & 34\\
+elevation\_angle & korkeuskulma (astetta) & 11.9\\
+quality\_ant\_phase\_jitter & antennikohtainen jitter & {0.15,0.15,0.15,0.15,0.14,0.16,0.29,0.34}\\
+ss\_jitter & jitter-arvojen neliösumma & 0.3349\\
+quality\_ant\_snr & antennikohtainen signaali-kohinasuhde & {24.76,37.48,40.75,36.\newline 37,28.5,28.2,16.15,11.27}\\
+snr\_jitter & signaali-kohinasuhteiden neliösumma & 6996.473\\
+\hline
+\end{tabular}
+\caption{Havaintomuuttujat}
+\label{tab:muuttujat}
+\end{table}
+
+Atsimuuttikulma $\phi$ lasketaan aina vastaanottimen tietyltä sivulta, joten se vastaa napapohjoista ainoastaan siinä tapauksessa, että vastaanottimen kyseinen sivu on asetettu kohtisuoraan napapohjoiseen nähden. Käytännön syistä tämä ei ole aina mahdollista eikä edes haluttavaa. Sen vuoksi jokaiselle vastaanottimelle on tietokantaan tallennettu oma suuntimakulma $\eta$. Triangulaatiossa alla käytetään napapohjoisesta laskettuja kulmia $\Phi$, jotka lasketaan jokaiselle havainnolle havainnon vastaanottimen suuntimakulman avulla
+
+\begin{align}
+\Phi=(\phi + \eta+360) \hspace{0.1cm} \% \hspace{0.1cm}360.
+\end{align}
+
+Kulmamuunnos tehdään paikannusalgoritmia suoritettaessa.
 
 ## Malli
 
