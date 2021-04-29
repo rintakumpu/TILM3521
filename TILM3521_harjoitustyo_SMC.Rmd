@@ -44,33 +44,42 @@ Applications" (2010). SMC-menetelmille on lukuisia sovellutuksia esimerkiksi Bay
 
 ## Suodinongelma
 
-Stokastisten prosessien teoriassa suodinongelmaksi kutsutaan tilannetta, jossa halutaan muodostaa paras mahdollinen estimaatti jonkin järjestelmän tilan arvoille, kun ainoastaan osa tiloista voidaan havaita ja/tai havaintoihin liittyy kohinaa. Tavoitteena on siis laskea jonkin Markov-prosessin posteriorijakauma kyseisten havaintojen perusteella. Tässä tutkielmassa keskitytään erityisesti ns. Markovin piilomallin posteriorijakauman Bayesilaiseen ratkaisuun, kun itse ongelma on EPÄLINEAARINEN. Ongelmaa havainnollistaa kaavio (1).
+Stokastisten prosessien teoriassa suodinongelmaksi kutsutaan tilannetta, jossa halutaan muodostaa paras mahdollinen estimaatti jonkin järjestelmän tilan arvoille, kun ainoastaan osa tiloista voidaan havaita ja/tai havaintoihin liittyy kohinaa. Tavoitteena on siis laskea jonkin Markov-prosessin posteriorijakauma kyseisten havaintojen perusteella. Tässä tutkielmassa keskitytään erityisesti epälineaarisen ns. Markovin piilomallin posteriorijakauman Bayesilaiseen ratkaisuun. Ongelmaa havainnollistaa kaavio (1).
 
 \begin{equation}
 \begin{tikzcd}
 X_1 \arrow[d] \arrow[r] & X_2 \arrow[d] \arrow[r] & X_3 \arrow[d] \arrow[r] & \ldots & \makebox[\widthof{$ \text{havainnot}$}]{$\text{piilossa olevat tilat}$} \\
-Y_1 \arrow[r] & Y_2 \arrow[r] & Y_3 \arrow[r] & \ldots & \makebox[\widthof{$ \text{havainnot}$}]{$\text{havainnot}$}
+Y_1  & Y_2  & Y_3  & \ldots & \makebox[\widthof{$ \text{havainnot}$}]{$\text{havainnot}$}
 \end{tikzcd}
 \end{equation}
 
 Ongelmassa tiedämme, miten havaitut muuttujat kytkeytyvät "piilossa oleviin" muuttujiin sekä osaamme sanoa jotain tilamuuttujien todennäköisyyksistä. Oletamme lisäksi, että piilossa olevat tilat muodostavat Markovin ketjun. Kun aika-avaruus on diskreetti ja merkitsemme piilossa olevan prosessin tilaa ajanhetkellä $k$ $x_k$ ja havaittua prosessia $y_k$, meillä on siis olemassa mallit
 
 \begin{align}
-&x_{k+1} \sim p(x_{k+1}|x_k)\\
-&y_{k} \sim p(y_k|x_k).
+&\label{malli-1} x_{k+1} = f(x_k, \nu_k)\\
+&\label{malli-2} y_{k} = h(x_k)+e_k.
 \end{align}
 
-Näin määritettyjen mallien avulla SMC-menetelmät estimoivat sekventiaalisesti tilojen $X_k$ arvot minä hyvänsä ajan hetkellä $k$, kun ainoastaan prosessi $Y_1, \ldots, Y_k$ tunnetaan. Estimaatit saadaan posteriorijakaumasta $p(x_k | y_1,y_2,\ldots, y_k)$, jonka approksimaatio muodostetaan Bayesilaisittain  havaintojen pohjalta. Kuten mainittua ei *** tarvitse OLLA LINEAARINEN. SMC-menetelmissä stokastisen prosessin posteriorijakauman esittämiseen käytettyjä otoksia kutsutaan myös partikkeleiksi.
+Lisäksi tiedetään prosessin alkuhetken jakauma $x_1 \sim p_{x_{1}}$, tähän liittyvän kohinprosessin jakauma $\nu_k \sim p_{\nu_{k}}$ sekä malliin $y_k$ liittyvä kohina $e_k \sim p_{e_k}$. Mallit voidaan yleisemmällä tasolla esittää myös muodossa
 
-SUODINongelmaa lähellä on myös ns. s (*smoothing problem*), jossa ollaan kiinnostuneita. Tämä tutkielma keskittyy yksin suodinongelman ratkaisemiseen.
+\begin{align}
+&\label{malli-3} x_{k+1} \sim p(x_{k+1}|x_k)\\
+&\label{malli-4} y_{k} \sim p(y_k|x_k).
+\end{align}
+
+Tutkielman teoriaosassa käytetään ensisijaisesti yhtälöiden (\ref{malli-3}) ja  (\ref{malli-4}) muotoilua. Empiirisessä osassa palataan yhtälöiden (\ref{malli-1}) ja (\ref{malli-2}) muotoiluun. 
+
+Näin määritettyjen mallien avulla SMC-menetelmät estimoivat sekventiaalisesti tilojen $X_k$ arvot minä hyvänsä ajan hetkellä $k$, kun ainoastaan prosessi $Y_1, \ldots, Y_k$ tunnetaan. Estimaatit saadaan posteriorijakaumasta $p(x_k | y_1,y_2,\ldots, y_k)$, jonka approksimaatio muodostetaan Bayesilaisittain  havaintojen pohjalta. Kuten mainittua, ei SMC-perheen algoritmeja käytettäessä mallin $y_k=h(x_k)+e_k$ tarvitse olla lineaarinen eikä kohinaprosessien noudataa normaalijakaumaa. SMC-menetelmissä stokastisen prosessin posteriorijakauman esittämiseen käytettyjä otoksia kutsutaan myös partikkeleiksi. Suodinongelmaa lähellä on myös ns. tasoitusongelma (smoothing problem), jossa ollaan kiinnostuneita prosessin $x_k$ posteriorijakaumasta $p(x_k|y_k)$ jokaisena ajanhetkenä $1,\ldots,k$ ei ainoastaan haluttuna ajanhetkenä $k$. Tämä tutkielma keskittyy yksin suodinongelman ratkaisemiseen, mutta SMC-algoritmin marginalisointia koskevassa luvussa viitataan myös tasoitusongelman ratkaisuun.
 
 ## Historiaa
 
-Lineaarisen suodinongelman ratkaisun ... . 
+Lineaarisen suodinongelman ratkaisu on tunnettu ... Epälineaariselle ei-Gaussilaiselle mallille ...Muita vaihtoehtoja ovat EKF, UKF, QKF.
 
-Epälineaariselle ei-Gaussilaiselle mallille ...Muita vaihtoehtoja ovat EKF, UKF, QKF.
+It should b e stressed that both EKF and UKF approximate the model and propagate Gaussian distributions representitive of the post erior while the PMF uses the original model and approxi mates the posterior over a grid. The particle filt er (PF) also provides a numerical approximati on to the nonlinear filt eri ng prob lem similar to the PMF but uses an ad aptive stochastic grid that aut omatically select s relevant grid points i n the st ate space, and in contrast to the PMF, the st and ard PF has linear complexity i n the number o f grid points. The first traces of the PF date b ack to the 1950s [11 , 12] , and the control community made some attempts in the 1970s [ 13 , 14]. However, the PF era st arted with the semi nal paper [ 15] , and the i ndependent development s in [ 16 , 17]. Here, an important res ampli ng step was i ntroduced. The ti mi ng for proposing a general solution to the nonlinear filteri ng prob lem was perfect in that the computer development enabled the use of computationally complex algorithms in quite realistic prob lems. Si nce the paper [ 15] the research has steadily i ntensified; see the article collection [ 18] , the surveys [ 19-22] , and the monograph [23]. Fig. I illustrat es how the number of papers i ncreases exponenti ally each y ear, and the s ame appears to be true for applied papers. The PFs may be a serious alternative for real-ti me applications classically approached by the (E)KF. The more nonlinear model, or the more non-Gaussian noise, the more potential PFs have, especi ally in applications where computational power is rather cheap, and the s ampling rate i s moderate
 
-Ensimmäisen epälineaarisen suodinongelman Bayesilaisen/MC-ratkaisun esittivät Gordon, Salmond ja Smith artikkelissaan "Novel approach to nonlinear/non-Gaussian Bayesian state estimation" (1993). Gordonin, Salmondin ja Smithin ratkaisu eroaa notaatioltaan hieman tässä tutkielmassa esitetystä, mutta on olennaisesti sama. Suurin ero tämän tutkielman SMC-algoritmin sekä alkuperäisen SMC-algoritmin välillä on XXX. Artikkelissa ratkaisu kulki nimellä "bootstrap filter", saapasremmisuodin. MIKSI Termiä hiukkassuodin käytti ensimmäisen kerran Del Moral artikkelissa "Nonlinear Filtering: Interacting Particle Resolution" (1996), SMC-menetelmät termiä Liu ja Chen artikkelissa "Sequential Monte Carlo Methods for Dynamic Systems" (1998). Tässä tutkielmassa pyritään korostamaan suotimien yhteyttä Monte Carlo -algoritmeihin ja käytetään siksi termiä SMC-menetelmät. Poikkeuksen tähän tekee varsinainen esitetty algoritmi, jota kutsutaan tutkielmassa hiukkassuodin-algoritmiksi.
+Monte Carlo -ratkaisuja (esim. Princeton)
+
+Ensimmäisen epälineaarisen suodinongelman Bayesilaisen/MC-ratkaisun esittivät Gordon, Salmond ja Smith artikkelissaan "Novel approach to nonlinear/non-Gaussian Bayesian state estimation" (1993). Gordonin, Salmondin ja Smithin ratkaisu eroaa notaatioltaan hieman tässä tutkielmassa esitetystä, mutta on olennaisesti sama. Suurin ero tämän tutkielman SMC-algoritmin sekä alkuperäisen SMC-algoritmin välillä on XXX MITEN XXX. Artikkelissa ratkaisu kulki nimellä "bootstrap filter", saapasremmisuodin. MIKSI Termiä hiukkassuodin käytti ensimmäisen kerran Del Moral artikkelissa "Nonlinear Filtering: Interacting Particle Resolution" (1996), SMC-menetelmät termiä Liu ja Chen artikkelissa "Sequential Monte Carlo Methods for Dynamic Systems" (1998). Tässä tutkielmassa pyritään korostamaan suotimien yhteyttä Monte Carlo -algoritmeihin ja käytetään siksi termiä SMC-menetelmät. Poikkeuksen tähän tekee varsinainen esitetty algoritmi, jota kutsutaan tutkielmassa hiukkassuodin-algoritmiksi.
 
 # Bayesilainen suodin
 
@@ -100,7 +109,30 @@ Rekursion avulla voidaan laskea $p(x_k|y_{1:k})$ käymällä rekursio läpi $k$ 
 
 # Hiukassuodin-algoritmi
 
-Tässä luvussa esitetään algoritmi, joka hyödyntää luvussa 2. kuvattua Bayesilaista suodinta epälineaarisen suodinongelman ratkaisemiseen. Ennen varsinaista algoritmia käsitellään algoritmiin liittyvän uudelleenotantamenetelmän, partikkelien määrän / otoskoon ja ehdotusjakauman valinta. Lopuksi esiteetään algoritmin konvergenssia, marginaalijakaumaa sekä aikakompleksisuutta koskevia tuloksia. Esitetty algoritmi perustuu Fredrik Gustafssonin artikkeliin "Particle Filter Theory and Practice with Positioning Applications" (2010).
+Alla esitetään hiukassuodin-SMC-algoritmi Bayesilaisen, epälineaarisen suodinongelman ratkaisemiseksi. Tässä luvussa esitetään algoritmi, joka hyödyntää luvussa 2. kuvattua Bayesilaista suodinta epälineaarisen suodinongelman ratkaisemiseen. 
+
+Kun uudelleenotanta tehdään jokaisella algoritmin iteraatiolla, on kyseessä SIS-algoritmi. Kun uudelleenotanta tehdään esimerkiksi edellisessä alaluvussa kuvatun kynnysarvoehdon $\hat{N}_{eff}< N_{th}$ täyttessä, on kyseessä SIR-algoritmi. Algoritmin kuvauksessa käytetään notaatiota $x_k^i$, joka tarkoittaa, että tila $x_k$ käy ajanhetkellä $k$ gridin pisteessä $x^i$. Notaatiota tarvitaan, koska SMC-algoritmin läpikäymä gridi muuttuu ajan funktiona.
+
+Ennen varsinaista algoritmia käsitellään algoritmiin liittyvän uudelleenotantamenetelmän, partikkelien määrän / otoskoon ja ehdotusjakauman valinta. Lopuksi esiteetään algoritmin konvergenssia, marginaalijakaumaa sekä aikakompleksisuutta koskevia tuloksia. Esitetty algoritmi perustuu Fredrik Gustafssonin artikkeliin "Particle Filter Theory and Practice with Positioning Applications" (2010).
+
+\begin{algorithm}
+\DontPrintSemicolon
+\KwData{Generoidaan $x_1^i\sim p_{x_0}$ missä $i=1,\ldots,N$ ja jokainen partikkeli saa saman painon $w_{1|0}^i=1/N$.}
+\KwResult{Posteriorijakauma $p(x_{1:k}|y_{1:k})$.}
+\Begin{
+  \For{$k=1,2,\ldots,t$}{
+    \For{$i=1,2,\ldots,N$}{
+      \Begin{Päivitetään painot. $w_{k|k}^i=\frac{1}{c_k}w_{k|{k-1}}^ip(y_k|x_k^i)$, \newline missä normalisointipaino on $c_k=\sum_{i=1}^{N}w_{k|{k-1}}^ip(y_k|x_k^i).$}
+      \Begin{Estimoidaan $p$. \newline Lasketaan tiheydelle approksimaatio $\hat{p}(x_{1:k}|y_{1:k})=\sum_{i=1}^{N}w_{k|k}^i \delta(x_{1:k}-x_{1:k}^i)$, \newline
+      missä $\delta(x)$ on Diracin deltafunktio.}
+      \Begin{Lasketaan efektiivinen otoskoko $\hat{N}_{eff}=\frac{1}{\sum_i(w^i_{k|k})^2}$.}
+      \If{$\hat{N}_{eff}< N_{th}$}{\Begin{Otetaan uudet $N$ otosta palauttaen joukosta $\{x_{1:k}^i\}_{i=1}^N$, missä otoksen $i$ todennäköisyys on $w^i_{k|k}$.}}
+      \If{$k < t$}{\Begin{Aikapäivitys. \newline Luodaan ennusteet partikkeleille ehdotusjakaumasta $x_{k+1}^i\sim q(x_{k+1}|x_k^i,y_{k+1})$, \newline päivitetään partikkelien painot tärkeytysotannalla sen mukaan kuinka todennäköisiä partikkelien ennusteet ovat \label{tarkeytys} $w_{k+1|k}^i=w_{k|k}^i\frac{p(x_{k+1}^i|x_k^i)}{q(x_{k+1}^i|x_k^i,y_{k+1})}$.}}
+    } 
+  }  
+}
+\caption{Hiukassuodin}
+\end{algorithm}
 
 ## Parametrien valinta
 
@@ -120,11 +152,11 @@ Yleisesti ottaen $N$ kannattaa asettaa sellaiseksi, että se paitsi tuottaa riit
 
 ### Uudelleenotantamenetelmän valinta
 
-Ilman uudelleenotantaa on todennäköistä, että algoritmi alkaa kärsiä otosten ehtymisestä. Toisin sanoen kaikki painot alkavat keskittyä vain muutamalle havainnolle. Uudelleenotanta tarjoaa osittaisen ratkaisun tähän ongelmaan, mutta hävittää samalla informaatiota ja siten lisää satunnaisotantaan liittyvää epävarmuutta. Yleisesti ottaen kannattaa uudelleenotanta aloittaa vasta siinä vaiheessa algoritmin suorittamista, kun siitä on otosten ehtymisen kannalta hyötyä. 
+Ilman uudelleenotantaa on todennäköistä, että algoritmi alkaa kärsiä otosten ehtymisestä. Toisin sanoen kaikki painot alkavat keskittyä vain muutamalle partikkelille. Uudelleenotanta tarjoaa osittaisen ratkaisun tähän ongelmaan, mutta hävittää samalla informaatiota ja siten lisää satunnaisotantaan liittyvää epävarmuutta. Yleisesti ottaen kannattaa uudelleenotanta aloittaa vasta siinä vaiheessa algoritmin suorittamista, kun siitä on otosten ehtymisen kannalta hyötyä. 
 
-Jos alla esitetyssä algoritmissa uudelleenotanta suoritetaan jokaisella algoritmin läpikäynnillä on kyseessä ns. SIR-algoritmi (sampling importance resampling). Vaihtoehtona on hyödyntää tärkeytysotantaa ja suorittaa uudelleenotanta ainoastaan, kun otoskoon ehtymisen mittarina käytettävä efektiivinen otoskoko painuu jonkin kynnysarvon alapuolelle. Tätä kutsutaan SIS-algoritmiksi (sampling importance sampling).
+Jos alla esitetyssä algoritmissa uudelleenotanta suoritetaan jokaisella algoritmin läpikäynnillä on kyseessä ns. SIR-algoritmi (sequential importance resampling). Vaihtoehtona on hyödyntää tärkeytysotantaa ja suorittaa uudelleenotanta ainoastaan, kun otoskoon ehtymisen mittarina käytettävä efektiivinen otoskoko painuu jonkin kynnysarvon alapuolelle. Tätä kutsutaan SIS-algoritmiksi (sequential importance sampling).
 
-Efektiivinen otoskoko saadaan laskettua variaatiokertoimesta $c_\nu$ lasketaan kaavalla
+Efektiivinen otoskoko saadaan laskettua variaatiokertoimesta $c_\nu$ kaavalla
 
 \begin{align}\label{N-eff}
 N_{eff}= \frac{N}{1+c_\nu^2(w^i_{k|k})} = \frac{N}{1+\frac{\text{Var}(w^i_{k|k})}{(\mathbb{E}[w^i_{k|k}])^2}} =\frac{N}{1+N^2\text{Var}(w^i_{k|k})}.
@@ -156,6 +188,8 @@ Ennen otannan tarkastelua määritellään mallille signaali-kohinasuhde uskotta
 \text{SNR}\propto \frac{\text{max}_{x_k}p(y_k|x_k)}{\text{max}_{x_k}p(x_k|x_{k-1})}. 
 \end{align}
 
+Kirjoitetaan lisäksi yhtälöt MUODOSSA
+
 Kun suhde (\ref{SNR}) on matala, on prioriotanta luonnollinen valinta. Tässä käytetään ehdotusjakauman tilavektorin ehdollista prioria eli
 
 \begin{align}\label{prioriotanta-q}
@@ -170,32 +204,15 @@ q(x_k|x_{1:k-1},y_{k}) \propto p(y_k|x_k).
 
 Tässä tapauksessa vaaditaan lisäksi, että uskottavuusfunktio on integroituva.
 
-## Algoritmi
-
-Alla esitetään hiukassuodin-SMC-algoritmi Bayesilaisen, epälineaarisen suodinongelman ratkaisemiseksi. Kun uudelleenotanta tehdään jokaisella algoritmin iteraatiolla, on kyseessä SIR-algoritmi. Kun uudelleenotanta tehdään esimerkiksi edellisessä alaluvussa kuvatun kynnysarvoehdon $\hat{N}_{eff}< N_{th}$ täyttessä, on kyseessä SIS-algoritmi. Algoritmin kuvauksessa käytetään notaatiota $x_k^i$, joka tarkoittaa, että tila $x_k$ käy ajanhetkellä $k$ gridin pisteessä $x^i$. Notaatiota tarvitaan, koska SMC-algoritmin läpikäymä gridi muuttuu ajan funktiona.
-
-\begin{algorithm}
-\DontPrintSemicolon
-\KwData{Generoidaan $x_1^i\sim p_{x_0}$ missä $i=1,\ldots,N$ ja jokainen partikkeli saa saman painon $w_{1|0}^i=1/N$.}
-\KwResult{Posteriorijakauma $p(x_{1:k}|y_{1:k})$.}
-\Begin{
-  \For{$k=1,2,\ldots,t$}{
-    \For{$i=1,2,\ldots,N$}{
-      \Begin{Päivitetään painot. $w_{k|k}^i=\frac{1}{c_k}w_{k|{k-1}}^ip(y_k|x_k^i)$, \newline missä normalisointipaino on $c_k=\sum_{i=1}^{N}w_{k|{k-1}}^ip(y_k|x_k^i).$}
-      \Begin{Estimoidaan $p$. \newline Lasketaan tiheydelle approksimaatio $\hat{p}(x_{1:k}|y_{1:k})=\sum_{i=1}^{N}w_{k|k}^i \delta(x_{1:k}-x_{1:k}^i)$, \newline
-      missä $\delta(x)$ on Diracin deltafunktio.}
-      \Begin{Lasketaan efektiivinen otoskoko $\hat{N}_{eff}=\frac{1}{\sum_i(w^i_{k|k})^2}$.}
-      \If{$\hat{N}_{eff}< N_{th}$}{\Begin{Otetaan uudet $N$ otosta palauttaen joukosta $\{x_{1:k}^i\}_{i=1}^N$, missä otoksen $i$ todennäköisyys on $w^i_{k|k}$.}}
-      \If{$k < t$}{\Begin{Aikapäivitys. \newline Luodaan ennusteet partikkeleille ehdotusjakaumasta $x_{k+1}^i\sim q(x_{k+1}|x_k^i,y_{k+1})$, \newline päivitetään partikkelien painot tärkeytysotannalla sen mukaan kuinka todennäköisiä partikkelien ennusteet ovat $w_{k+1|k}^i=w_{k|k}^i\frac{p(x_{k+1}^i|x_k^i)}{q(x_{k+1}^i|x_k^i,y_{k+1})}$.}}
-    } 
-  }  
-}
-\caption{Hiukassuodin}
-\end{algorithm}
-
 ## Konvergenssituloksia
 
-Kun $N \rightarrow \infty$ algoritmille pätee $\hat{p}(x_{1:k}|y_{1:k}) \xrightarrow{a.s.} p(x_{1:k}|y_{1:k})$.
+Alla esitetään kaksi algoritmiin liittyvää konvergenssitulosta, se kuinka hyvin esitetyllä SMC-algoritmilla arvioitu posterioritiheys $\hat{p}(x_{1:k}|y_{1:k})$ approksimoi todellista tiheysfunktiota $p(x_{1:k}|y_{1:k})$ sekä mikä on approksimaation keskineliövirhe. Tulokset noudattavat Crisanin ja Doucet'n artikkelia "Convergence of Sequential Monte Carlo Methods" (2000).
+
+*Konvergenssitulos 1*: Kun $N \rightarrow \infty$ algoritmille pätee $\forall k$ tulos $\hat{p}(x_{1:k}|y_{1:k}) \xrightarrow{a.s.} p(x_{1:k}|y_{1:k})$.
+
+*Konvergenssitulos 2*: MSE-konvergenssi.
+
+Konvergenssituloksia ei tämän tutkielman puitteissa todisteta.
 
 ## Marginaalijakauma
 
@@ -215,21 +232,48 @@ yllä esitetyn sijaan. Tällöin jokaisessa aikapäivitysaskeleessa lasketaan pa
 
 ## Aikakompleksisuus
 
-Algoritmin perusmuodon aikakompleksisuus on $\mathcal{O}(N)$. Marginalisointi edellä esitetyllä tärkeytyspainolla lisää algoritmin aikakompleksisuutta $\mathcal{O}(N)\rightarrow\mathcal{O}(N^2)$, koska jokaisen partikkelin kohdalla painot lasketaan jokaisen tila-aika-avaruuspolun yli. On selvää, että erityisesti isoilla otoskoon $N$ arvoilla ei yllä esitetty marginalisointi enää ole mielekästä. Alla esitetään vielä $\mathcal{O}(N\text{log}(N))$ versio marginaalihiukkassuotimesta.
+Algoritmin perusmuodon aikakompleksisuus on $\mathcal{O}(N)$. Uudelleenotantamenetelmän tai ehdotusjakauman valinta ei suoraan vaikuta aikakompleksisuuteen. Sen sijaan marginalisointi edellä esitetyllä tärkeytyspainolla lisää algoritmin aikakompleksisuutta $\mathcal{O}(N)\rightarrow\mathcal{O}(N^2)$, koska jokaisen partikkelin kohdalla painot lasketaan jokaisen tila-aika-avaruuspolun yli. On selvää, että erityisesti isoilla otoskoon $N$ arvoilla ei yllä esitetty marginalisointi enää ole mielekästä. Tällaisia tilanteita varten esitetään alla vielä $\mathcal{O}(N\text{log}(N))$ versio marginaalihiukkassuotimesta. Esitys noudattaa Klaas &al. artikkelia "Toward Practical $N^2$ Monte Carlo: the Marginal Particle Filter" (2012). Algoritmin tehokkaaseen toteutukseen R-kielellä palataan luvussa [Paikannusesimerkki].
 
+# Paikannusesimerkki 
 
-
-# Paikannusesimerkki
-
-Esimerkissä analysoidaan ja vertaillaan algoritmin eri versioiden suorituskykyä. Esimerkkidatana käytetään AOA-havaintoja seitsemän vastaanottimen sekä XXX lähettimen välillä. Vastaanottimina toimivat Walkbase XR-2 -sensorit, jotka MITÄ. The sensor is being built around the BLE5.1 angle of arrival (AoA) specifications, enabling it to produce sub meter positioning results. Lähettimenä toimi 25 Bluetooth-paikannustagista koostuva Walkbase Foculator -testilaite. 
+Esimerkissä käyteteään SMC-algoritmia Bluetooth-paikannussovelluksessa paikannustarkkuuden parantamiseen. Paikannusdata kerätään toimistoympäristössä liikkuvien BLE-lähettimien sekä kattoon sijoitettujjen vastaanottimien avulla. **kerättyjä BLE5.1-standardin mukaisia signaalin tulokulmahavaintoja eli AoA-havaintoja (angle of arrival). Paikannukseen käytetään triangulaatio-algoritmia. Lopuksi esimerkissä analysoidaan ja vertaillaan algoritmin eri versioiden suorituskykyä sekä suorituskyvyn että paikannustarkkuuden näkökulmasta.
 
 ## Datan kuvaus
 
-Riippuen päällä olevien paikannustagien lukumäärästä, tuottaa n. havainto sekunnissa. Jokainen havainto koostuu seuraavista muuttujista. 
+Riippuen päällä olevien paikannustagien lukumäärästä, tuottaa n. havainto sekunnissa. Jokainen havainto koostuu taulukossa \ref{tab:muuttujat} kuvatuista muuttujista.
+
+\begin{table}[hp]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+Muuttuja & Kuvaus & Esimerkkiarvo\\
+\hline
+ts & 124 & 124\\
+asset\_tag\_mac & a & 124\\
+locator\_mac & vvv & 124\\
+rssi & vvv & 124\\
+azimuth\_angle & vvv & 124\\
+elevation\_angle & vvv & 124\\
+quality\_ant\_phase\_jitter & vvv & 124\\
+quality\_ant\_snr & vvv & 124\\
+\hline
+\end{tabular}
+\caption{Muuttujat}
+\label{tab:muuttujat}
+\end{table}
 
 ## Koeasetelma
 
+Lähettimenä toimii Lähettimenä toimi 25 Bluetooth-paikannustagista koostuva Walkbase Foculator -testilaite.
+
+KARTTA, jossa sensorit.
+
+TRAJECTORY. jotka MITÄ. The sensor is being built around the BLE5.1 angle of arrival (AoA) specifications, enabling it to produce sub meter positioning results.
+
+Esimerkkidatana käytetään AoA-havaintoja seitsemän vastaanottimen sekä XXX lähettimen välillä.
 Dataa kerättiin. Data kerättiin yöaikaan, jolloin toimiston käyttöaste oli minimissä. Tällä minimoitiin radiosignaalin tielle osuvien ihmisten vaikutus tuloksiin.
+
+## Malli
 
 ## Algoritmi
 
@@ -248,6 +292,7 @@ Tässä tutkielmassa on esitetty pääpiirteittäin ... ja lisäksi tarkasteltu 
 - Gustafsson (2010): **Particle Filter Theory and
 Practice with Positioning
 Applications**. [https://ieeexplore.ieee.org/document/5546308](https://ieeexplore.ieee.org/document/5546308).
+- Klaas, De Freitas, Doucet (2012): **Toward Practical N2 Monte Carlo: the Marginal Particle Filter**. [https://arxiv.org/abs/1207.1396](https://arxiv.org/abs/1207.1396)
 - Petris, Petrone & Campagnoli (2009): **Dynamic Linear Models with R**. Springer.
 - Särkkä (2013): **Bayesian Filtering and Smoothing.** Cambridge University Press.
 [https://users.aalto.fi/~ssarkka/pub/cup_book_online_20131111.pdf](https://users.aalto.fi/~ssarkka/pub/cup_book_online_20131111.pdf).
