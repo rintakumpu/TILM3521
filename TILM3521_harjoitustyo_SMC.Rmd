@@ -12,6 +12,9 @@ header-includes:
    - \usepackage{float}
    - \usepackage{array, makecell}
    - \usepackage[ruled,vlined]{algorithm2e} 
+   - \usepackage{graphicx}
+   - \usepackage{multicol}
+   - \graphicspath{ {./images/} }
    - \usetikzlibrary{shapes.geometric,arrows}
    - \def\TikZ{Ti\emph{k}Z\ }
 urlcolor: blue   
@@ -36,6 +39,77 @@ knitr::opts_chunk$set(echo = FALSE, fig.width=3, fig.height=2.8, fig.show='hold'
 # Used libraries
 library(knitr) # For creating PDF
 library(pander)
+
+#source("R/koeasetelma.R",local=T)
+# Converts zones to polygons
+source("R/zones_as_polygons.R",local=T)
+# Reads point coordinates into a data frame
+source("R/points_as_points.R",local=T)
+```
+
+```{r eval=F}
+# Draw map
+# Zones as polygons plots zonedata as ggplot2 polygons
+source("R/zones_as_polygons.R",local=T)
+# Reads point coordinates into a data frame
+source("R/points_as_points.R",local=T)
+
+# LOAD POLYGONS / POIS
+# Load and wrangle (zone) polygon data
+zones <- read.csv("data/zones.csv")
+zones_for_plotting <- zones_as_polygons(zones)
+
+# Parse recordings
+#recordings <- read_csv("data/information_points.csv") 
+#sensors <- recordings[(nrow(recordings)-2):nrow(recordings),] %>% arrange(id)
+#recordings <- recordings[1:(nrow(recordings)-3),] %>% arrange(id)
+#recordings_xy <- points_as_points(recordings, "position")
+#recordings_xy <- recordings_xy %>% add_column(id=rownames(recordings_xy))
+
+# Parse sensors
+#sensors_xy <- points_as_points(sensors, "position")
+#rownames(sensors_xy) <- substr(sensors$comment, 12, 28)
+# Add single letter name for sensor
+#sensors$name <- c("A","B","C")
+
+# Floor we can just hard-code for now
+floor_polygon_wkt <- "POLYGON (( 22.29453511085012 60.4483613949082752, 22.2946014103945416 60.4484048647438925, 22.2946353387669696 60.448391336179192, 22.2948368842480704 60.44851423830589, 22.2949309344403517 60.4484756693510974, 22.2948474192526227 60.4484273970519439, 22.2949762150528876 60.4483746483148394, 22.2948794145486353 60.4483188093082902, 22.2948949603596738 60.4482877395097233, 22.2949791172868608 60.4482523767460833, 22.2949032348697145 60.4482119549142709, 22.2947736689820957 60.4482661275728788, 22.2947533219121432 60.4482542293099314, 22.2947143172495998 60.4482694438414754, 22.2947224188828876 60.4482957453147307, 22.2946766563109158 60.448312592767202, 22.2946543735452032 60.4483107337472845, 22.29453511085012 60.4483613949082752))"
+floor_polygon <- readWKT(floor_polygon_wkt)
+no_of_coordinates <- length(floor_polygon@polygons[[1]]@Polygons[[1]]@coords[,1])
+starting_index <- 1
+floor_for_plotting <- as.data.frame(matrix(nrow=0, ncol=3))
+floor_for_plotting[starting_index:(starting_index+no_of_coordinates-1),1] <- floor_polygon@polygons[[1]]@Polygons[[1]]@coords[,1]
+floor_for_plotting[starting_index:(starting_index+no_of_coordinates-1),2] <- floor_polygon@polygons[[1]]@Polygons[[1]]@coords[,2]
+floor_for_plotting[starting_index:(starting_index+no_of_coordinates-1),3] <- rep(1, no_of_coordinates)
+colnames(floor_for_plotting) <- c("x", "y", "group")
+ 
+# Get "Outside" coordinates from floor polygon bounding box
+outside_x <- floor_polygon@bbox["x","min"]
+outside_y <- floor_polygon@bbox["y","max"]
+
+# Creates site map
+site_map <- ggplot(zones_for_plotting, aes(group=id, x = x, y = y)) + geom_polygon(data=floor_for_plotting, aes(x=x, y=y, group=group), alpha=0.2) + geom_polygon(aes(), alpha=0.2) + xlab("") + ylab("")
+#site_map <- ggplot()
+
+# Only plot locators present in the data
+#locator_macs <- unique(cte_angles_f3$locator_mac)
+locators_subset <- subset(locators, mac %in% locator_macs)
+# Locator coordinates
+locators_xy_original <- points_as_points(locators_subset, "position")
+locators_xy<- locators_xy_original
+locators_xy$x <- locators_xy$x - 0.00012
+locators_xy$y <- locators_xy$y + 0.000123
+# And plot
+for(i in 1:nrow(locators_xy)) {
+  site_map <- site_map + annotate("point", x=locators_xy[i,"x"], y=locators_xy[i,"y"], color="cyan", size=5) + annotate("text", x=locators_xy[i,"x"], y=locators_xy[i,"y"], label=locators_xy[i,"id"], size=3)
+}
+
+# Foculator position 1
+#site_map <- site_map + annotate("point", y=60.44819, x=22.29489, color="magenta", size=3)
+# Foculator position 2
+#site_map <- site_map + annotate("point", y=60.44814, x=22.29487, color="magenta", size=3)
+# Foculator position 3
+#site_map <- site_map + annotate("point", y=60.44817, x=22.29496, color="magenta", size=3)
 ```
 
 # Johdanto
@@ -151,8 +225,8 @@ Alla käsitellään algoritmiin liittyvän uudelleenotantamenetelmän, partikkel
 
 \begin{algorithm}\label{hiukassuodin}
 \DontPrintSemicolon
-\KwData{Generoidaan $x_1^i\sim p_{x_0}$ missä $i=1,\ldots,N$ ja jokainen partikkeli saa saman painon $w_{1|0}^i=1/N$.}
-\KwResult{Posteriorijakauma $p(x_{1:k}|y_{1:k})$.}
+\KwResult{Posteriorijakauman $p(x_{1:k}|y_{1:k})$ estimaatti.}
+\KwData{Havainnot $y_k$. Generoitu $x_1^i\sim p_{x_0}$ missä $i=1,\ldots,N$ ja jokainen partikkeli saa saman painon $w_{1|0}^i=1/N$.}
 \Begin{
   \For{$k=1,2,\ldots,t$}{
     \For{$i=1,2,\ldots,N$}{
@@ -285,7 +359,9 @@ yllä esitetyn sijaan. Tällöin jokaisessa aikapäivitysaskeleessa lasketaan pa
 
 ## Aikakompleksisuus
 
-T. SUORITUSKYKY. Algoritmin perusmuodon aikakompleksisuus on $\mathcal{O}(N)$. Uudelleenotantamenetelmän tai ehdotusjakauman valinta ei suoraan vaikuta aikakompleksisuuteen. Sen sijaan marginalisointi edellä esitetyllä tärkeytyspainolla lisää algoritmin aikakompleksisuutta $\mathcal{O}(N)\rightarrow\mathcal{O}(N^2)$, koska jokaisen partikkelin kohdalla painot lasketaan jokaisen tila-aika-avaruuspolun yli. On selvää, että erityisesti isoilla otoskoon $N$ arvoilla ei yllä esitetty marginalisointi enää ole mielekästä. Tällaisia tilanteita varten esitetään alla vielä $\mathcal{O}(N\text{log}(N))$ versio marginaalihiukkassuotimesta. Esitys noudattaa Klaas &al. artikkelia "Toward Practical $N^2$ Monte Carlo: the Marginal Particle Filter" (2012). Algoritmin tehokkaaseen toteutukseen R-kielellä palataan luvussa [Paikannusesimerkki].
+T. SUORITUSKYKY. Algoritmin perusmuodon aikakompleksisuus on $\mathcal{O}(N)$. Uudelleenotantamenetelmän tai ehdotusjakauman valinta ei suoraan vaikuta aikakompleksisuuteen. Sen sijaan marginalisointi edellä esitetyllä tärkeytyspainolla lisää algoritmin aikakompleksisuutta $\mathcal{O}(N)\rightarrow\mathcal{O}(N^2)$, koska jokaisen partikkelin kohdalla painot lasketaan jokaisen tila-aika-avaruuspolun yli. On selvää, että erityisesti isoilla otoskoon $N$ arvoilla ei yllä esitetty marginalisointi enää ole mielekästä. 
+
+Tällaisia tilanteita varten SMC-algoritmista on olemassa $\mathcal{O}(N\text{log}(N))$ -versioita, jotka perustuvat N:n kappaleen oppimiseen (N-body learning). Näiden algoritmien käsittely jää tämän tutkielman ulkopuolelle, mutta katsaus algoritmeista on esitetty esimerkiksi Klaas &al. artikkelissa "Toward Practical $N^2$ Monte Carlo: the Marginal Particle Filter" (2012). 
 
 BATCH VS ONLINE.
 
@@ -295,20 +371,40 @@ Esimerkissä käyteteään SMC-algoritmia Bluetooth-paikannussovelluksessa paika
 
 ## Koeasetelma
 
-Lähettimenä toimii Lähettimenä toimi 25 Bluetooth-paikannustagista koostuva Walkbase Foculator -testilaite (kuvat 1 ja 2).
+Paikaunnusesimerkissä lähettimenä toimi 25 Bluetooth-paikannustagista koostuva Walkbase Foculator -testilaite (kuva \ref{fig:foculator}), vastaanottimena puolestaan toimistoympäristöön asennetut seitsemän Walkbase XR-2 -vastaanotinta (kuva \ref{fig:xr2}). Jokainen vastaanotin sisältää kahdeksan antennia, joiden havaintojen perusteella vastaanottimet laskevat XXX tulokulman. Data on kuvattu tarkemmin alaluvussa 4.2. Koeympäristön kartta on kuvattuna kaaviossa 1.
+
+\begin{multicols}{2}
+\begin{figure}[H]
+\centering
+\includegraphics[width=7cm]{foculator}
+\caption{Walkbase Foculator}
+\label{fig:foculator}
+\end{figure}
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=7cm]{foculator}
+\caption{Walkbase XR-2}
+\label{fig:xr2}
+\end{figure}
+\end{multicols}
+
+Toimistympäristön KARTTA, jossa sensorit.
+
+```{r eval=F}
+site_map
+```
 
 
-KARTTA, jossa sensorit.
+TRAJECTORY. jotka MITÄ. 
 
-TRAJECTORY. jotka MITÄ. The sensor is being built around the BLE5.1 angle of arrival (AoA) specifications, enabling it to produce sub meter positioning results.
-
-Esimerkkidatana käytetään AoA-havaintoja seitsemän vastaanottimen sekä XXX lähettimen välillä.
 Dataa kerättiin. Data kerättiin yöaikaan, jolloin toimiston käyttöaste oli minimissä. Tällä minimoitiin radiosignaalin tielle osuvien ihmisten vaikutus tuloksiin.
 
 ## Datan kuvaus
 
 Riippuen päällä olevien paikannustagien lukumäärästä, tuottaa n. havainto sekunnissa. Havaintoja on $N_{obs}=$ kappaletta. Jokainen havainto koostuu taulukossa \ref{tab:muuttujat} kuvatuista muuttujista.
 
+\def\arraystretch{1.25} 
 \begin{table}[H]
 \centering
 \begin{tabular}{|l|l|l|}
@@ -323,10 +419,10 @@ rssi & signaalin vahvuus (dBm) & -81\\
 azimuth\_angle & atsimuuttikulma $\phi$ (astetta) & 102.7\\
 converted\_angle & napapohjoisesta laskettu kulma $\Phi$ (astetta) & 34\\
 elevation\_angle & korkeuskulma (astetta) & 11.9\\
-quality\_ant\_phase\_jitter & antennikohtainen jitter & \makecell[l]{ (0.15,0.15,0.15,0.15,\\0.14,0.16,0.29,0.34)}\\
-ss\_jitter & jitter-arvojen neliösumma & 0.3349\\
-quality\_ant\_snr & antennikohtainen signaali-kohinasuhde & \makecell[l]{ (24.76,37.48,40.75,36.37\\ 28.5,28.2,16.15,11.27)}\\
-snr\_jitter & signaali-kohinasuhteiden neliösumma & 6996.473\\
+\makecell[tl]{quality\_ant\_phase\_jitter} & \makecell[tl]{antennikohtainen jitter} & \makecell[tl]{ (0.15,0.15,0.15,0.15,\\0.14,0.16,0.29,0.34)}\\
+ss\_jitter & antennikohtaisten jitter-arvojen neliösumma & 0.3349\\
+\makecell[tl]{quality\_ant\_snr} & \makecell[tl]{antennikohtainen signaali-kohinasuhde} & \makecell[tl]{(24.76,37.48,40.75,36.37\\ 28.5,28.2,16.15,11.27)}\\
+\makecell[tl]{snr\_jitter} & \makecell[tl]{antennikohtaisten signaali-kohinasuhteiden\\neliösumma} & \makecell[tl]{6996.473}\\
 \hline
 \end{tabular}
 \caption{Havaintomuuttujat}
@@ -341,13 +437,17 @@ Atsimuuttikulma $\phi$ lasketaan aina vastaanottimen tietyltä sivulta, joten se
 
 ## Malli
 
+Paikannus kerran sekunnissa.
+
 ## Algoritmi
 
 ## Tulokset
 
 # Lopuksi
 
-Tässä tutkielmassa on esitetty pääpiirteittäin ... ja lisäksi tarkasteltu miten eri valinnat vaikuttavat algoritmin suorituskykyyn yksinkertaisen mutta XXX esimerkin avulla. Ei oteta kantaa esimerkiksi JATKOKYSYMYKSIÄ mahdollisuus laajentaa.
+Tässä tutkielmassa on esitetty pääpiirteittäin SMC-menetelmien teoria sekä XXX algoritmeja. 
+
+Tutkielmassa on lisäksi tarkasteltu miten eri valinnat vaikuttavat algoritmin suorituskykyyn yksinkertaisen mutta XXX esimerkin avulla. Ei oteta kantaa esimerkiksi JATKOKYSYMYKSIÄ mahdollisuus laajentaa.
 
 # Lähteet    
 
