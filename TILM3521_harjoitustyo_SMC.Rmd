@@ -9,6 +9,8 @@ header-includes:
    - \usepackage{tikz-cd}
    - \usepackage{mathtools}
    - \usepackage{pict2e}
+   - \usepackage{float}
+   - \usepackage{array, makecell}
    - \usepackage[ruled,vlined]{algorithm2e} 
    - \usetikzlibrary{shapes.geometric,arrows}
    - \def\TikZ{Ti\emph{k}Z\ }
@@ -109,25 +111,56 @@ Rekursion avulla voidaan laskea $p(x_k|y_{1:k})$ käymällä rekursio läpi $k$ 
 
 # Hiukassuodin-algoritmi
 
-Alla esitetään hiukassuodin-SMC-algoritmi Bayesilaisen, epälineaarisen suodinongelman ratkaisemiseksi. Tässä luvussa esitetään algoritmi, joka hyödyntää luvussa 2. kuvattua Bayesilaista suodinta epälineaarisen suodinongelman ratkaisemiseen. 
+Täsäs luvussa esitetään hiukassuodin-SMC-algoritmi Bayesilaisen, epälineaarisen suodinongelman ratkaisemiseksi. Algoritmi on numeerinen toteutus luvussa 2. kuvatusta Bayesilaisesta suotimesta. Esitetty algoritmi perustuu Fredrik Gustafssonin artikkeliin "Particle Filter Theory and Practice with Positioning Applications" (2010).
 
-Kun uudelleenotanta tehdään jokaisella algoritmin iteraatiolla, on kyseessä SIS-algoritmi. Kun uudelleenotanta tehdään esimerkiksi edellisessä alaluvussa kuvatun kynnysarvoehdon $\hat{N}_{eff}< N_{th}$ täyttessä, on kyseessä SIR-algoritmi. Algoritmin kuvauksessa käytetään notaatiota $x_k^i$, joka tarkoittaa, että tila $x_k$ käy ajanhetkellä $k$ gridin pisteessä $x^i$. Notaatiota tarvitaan, koska SMC-algoritmin läpikäymä gridi muuttuu ajan funktiona.
+Algoritmi alustetaan jakaumasta $x_1^i\sim p_{x_0}$ generoiduilla $N$-kappaleella partikkeleita. Jokaiselle partikkelille annetaan alustuksessa sama paino $w_{1|0}^i=1/N$. Algoritmi suoritetaan jokaiselle partikkelille $i=1,2,\ldots,N$ jokaisella ajanhetkellä $k=1,2,\ldots,t$. Algoritmin kuvauksessa käytetään notaatiota $x_k^i$, joka tarkoittaa, että tila $x_k$ käy ajanhetkellä $k$ gridin pisteessä $x^i$. Notaatiota tarvitaan, koska SMC-algoritmin läpikäymä gridi muuttuu ajan funktiona. SYÖTE
 
-Ennen varsinaista algoritmia käsitellään algoritmiin liittyvän uudelleenotantamenetelmän, partikkelien määrän / otoskoon ja ehdotusjakauman valinta. Lopuksi esiteetään algoritmin konvergenssia, marginaalijakaumaa sekä aikakompleksisuutta koskevia tuloksia. Esitetty algoritmi perustuu Fredrik Gustafssonin artikkeliin "Particle Filter Theory and Practice with Positioning Applications" (2010).
+Algoritmin ensimmäisessä vaiheessa päivitetään painot yhtälön \ref{painopaivitys} mukaan.
 
-\begin{algorithm}
+\begin{align}\label{painopaivitys}
+\hat{p}(x_{1:k}|y_{1:k})=\sum_{i=1}^{N}w_{k|k}^i \delta(x_{1:k}-x_{1:k}^i)
+\end{align}
+
+Normalisointipaino $c_k$ lasketaan puolestaan yhtälöstä (\ref{normalisointi}). VASTAAVUUS BAYES-suotimeen. 
+
+\begin{align}\label{normalisointi}
+c_k=\sum_{i=1}^{N}w_{k|{k-1}}^ip(y_k|x_k^i).
+\end{align}
+
+Seuraavassa vaiheessa estimoidaan $p$ laskemalla tiheyden $\hat{p}(x_{1:k}|y_{1:k})$ MC-estimaatti yhtälön (\ref{p-estimaatti}) perusteella
+
+\begin{align}\label{p-estimaatti}
+\hat{p}(x_{1:k}|y_{1:k})=\sum_{i=1}^{N}w_{k|k}^i \delta(x_{1:k}-x_{1:k}^i)
+\end{align}
+
+missä $\delta(x)$ on Diracin deltafunktio.
+
+Seuraavassa vaiheessa suoritetaan valinnainen uudelleenotanta. Kun uudelleenotanta tehdään jokaisella algoritmin iteraatiolla, on kyseessä SIS-algoritmi. Kun uudelleenotanta tehdään esimerkiksi efektiivisen otoskoon perusteella alla kuvatun kynnysarvoehdon $\hat{N}_{eff}< N_{th}$ täyttessä, on kyseessä SIR-algoritmi. Tämä algoritmi on esitetty algoritmissa (\ref{hiukassuodin}). Uudelleenotantaa tarkastellaan lähemmin alaluvussa 3.1.2. 
+Lopuksi päivitetään aika (jos $k < t$) ja luodaan uudet ennusteet partikkeleille ehdotusjakaumasta (\ref{ehdotusjakauma})
+
+\begin{align}\label{ehdotusjakauma}
+x_{k+1}^i\sim q(x_{k+1}|x_k^i,y_{k+1}
+\end{align}
+
+ja päivitetään partikkelien painot tärkeytysotannalla (\ref{tarkeytys}), sen mukaan kuinka todennäköisiä partikkelien ennusteet ovat 
+
+\begin{align}\label{tarkeytys} w_{k+1|k}^i=w_{k|k}^i\frac{p(x_{k+1}^i|x_k^i)}{q(x_{k+1}^i|x_k^i,y_{k+1})}.
+\end{align}
+
+Alla käsitellään algoritmiin liittyvän uudelleenotantamenetelmän, partikkelien määrän / otoskoon ja ehdotusjakauman valinta. Lopuksi esiteetään algoritmin konvergenssia, marginaalijakaumaa sekä aikakompleksisuutta koskevia tuloksia.
+
+\begin{algorithm}\label{hiukassuodin}
 \DontPrintSemicolon
 \KwData{Generoidaan $x_1^i\sim p_{x_0}$ missä $i=1,\ldots,N$ ja jokainen partikkeli saa saman painon $w_{1|0}^i=1/N$.}
 \KwResult{Posteriorijakauma $p(x_{1:k}|y_{1:k})$.}
 \Begin{
   \For{$k=1,2,\ldots,t$}{
     \For{$i=1,2,\ldots,N$}{
-      \Begin{Päivitetään painot. $w_{k|k}^i=\frac{1}{c_k}w_{k|{k-1}}^ip(y_k|x_k^i)$, \newline missä normalisointipaino on $c_k=\sum_{i=1}^{N}w_{k|{k-1}}^ip(y_k|x_k^i).$}
-      \Begin{Estimoidaan $p$. \newline Lasketaan tiheydelle approksimaatio $\hat{p}(x_{1:k}|y_{1:k})=\sum_{i=1}^{N}w_{k|k}^i \delta(x_{1:k}-x_{1:k}^i)$, \newline
-      missä $\delta(x)$ on Diracin deltafunktio.}
-      \Begin{Lasketaan efektiivinen otoskoko $\hat{N}_{eff}=\frac{1}{\sum_i(w^i_{k|k})^2}$.}
+      \Begin{Päivitetään painot $w_{k|k}.$}
+      \Begin{Estimoidaan $p$ laskemalla tiheydelle approksimaatio.}
+      \Begin{Lasketaan efektiivinen otoskoko $\hat{N}_{eff}$.}
       \If{$\hat{N}_{eff}< N_{th}$}{\Begin{Otetaan uudet $N$ otosta palauttaen joukosta $\{x_{1:k}^i\}_{i=1}^N$, missä otoksen $i$ todennäköisyys on $w^i_{k|k}$.}}
-      \If{$k < t$}{\Begin{Aikapäivitys. \newline Luodaan ennusteet partikkeleille ehdotusjakaumasta $x_{k+1}^i\sim q(x_{k+1}|x_k^i,y_{k+1})$, \newline päivitetään partikkelien painot tärkeytysotannalla sen mukaan kuinka todennäköisiä partikkelien ennusteet ovat \label{tarkeytys} $w_{k+1|k}^i=w_{k|k}^i\frac{p(x_{k+1}^i|x_k^i)}{q(x_{k+1}^i|x_k^i,y_{k+1})}$.}}
+      \If{$k < t$}{\Begin{Aikapäivitys. \newline Luodaan ennusteet partikkeleille ehdotusjakaumasta $x_{k+1}^i\sim q(x_{k+1}|x_k^i,y_{k+1})$, \newline päivitetään partikkelien painot tärkeytysotannalla.}}
     } 
   }  
 }
@@ -182,13 +215,17 @@ q(x_{1:k}|y_{1:k})=q(x_k|x_{1:k-1},y_{1:k})q(x_{1:k-1}|y_{1:k}).
 
 Jos yhtälöstä (\ref{proposal-factorization}) poimitaan ehdotusjakaumaksi ainoastaan termi $q(x_k|x_{1:k-1},y_{1:k})$ saadaan tämän avulla muodostettua hyvä approksimaatio arvoille $x_k$. Tämä on suodinongelman kannalta riittävää, koska olemme kiinnostuneita ainoastaan posteriorijakaumasta ajanhetkellä $k$ (tasoitusongelmassa tarvitsisimme koko polun $x_{1:k}$). Alla tarkastellaan edelleen Gustafssonia (2010) seuraten kahta ehdotusjakauman valintatapaa, prioriotantaa (prior sampling) sekä uskottavuusotantaa (likelihood sampling).
 
-Ennen otannan tarkastelua määritellään mallille signaali-kohinasuhde uskottavuuden maksimin ja priorin maksimin välisenä suhteena
+Ennen ehdotusjakauman  tarkastelua määritellään mallille signaali-kohinasuhde uskottavuuden maksimin ja priorin maksimin välisenä suhteena
 
 \begin{align}\label{SNR}
 \text{SNR}\propto \frac{\text{max}_{x_k}p(y_k|x_k)}{\text{max}_{x_k}p(x_k|x_{k-1})}. 
 \end{align}
 
-Kirjoitetaan lisäksi yhtälöt MUODOSSA
+Yhdistetään lisäksi ehdotusjakaumia varten yhtälöt (\ref{painopaivitys}) ja (\ref{normalisointi}), jolloin saadaan painojen päivitys muotoon (\ref{painopaivitys-propto}).
+
+\begin{align}\label{painopaivitys-propto}
+w^i_{k|k} \propto w^i_{k-1|k-1}\frac{p(y_k|x^i_k)p(x_k|x^{k-1})}{q(x_k|x^i_{k-1},y_k)}
+\end{align}
 
 Kun suhde (\ref{SNR}) on matala, on prioriotanta luonnollinen valinta. Tässä käytetään ehdotusjakauman tilavektorin ehdollista prioria eli
 
@@ -196,13 +233,29 @@ Kun suhde (\ref{SNR}) on matala, on prioriotanta luonnollinen valinta. Tässä k
 q(x_k|x_{1:k-1},y_{k})=p(x_k|x^i_{k-1}).
 \end{align}
 
-Kun taas signaali-kohinasuhde on kohtalainen tai korkea, on parempi käyttää ehdotusjakaumana skaalattua uskottavuusfunktiota
+Yhtälön (\ref{prioriotanta-q}) perusteella saadaan edelleen prioriotannan painoiksi (\ref{prioriotanta-w})
+
+\begin{align}\label{prioriotanta-w}
+w^i_{k|k} = w^i_{k|k-1}p(y_k|x^i_k) = w^i_{k-1|k-1}p(y_k|x^i_k).
+\end{align}
+
+Kun taas signaali-kohinasuhde on kohtalainen tai korkea, on parempi käyttää ehdotusjakaumana skaalattua uskottavuusfunktiota (\ref{uskottavuusotanta-q}). Tarkastellaan ensin tekijöihin jakoa (\{uskottavuusotanta-factorization}).
+
+\begin{align}\label{uskottavuusotanta-factorization}
+p(x_k|x^i_{k-1},y_k)=p(y_k|x_k)\frac{p(x_k|x^i_{k-1})}{p(y_k|x^i_{k-1})}
+\end{align}
+
+Kun SNR on korkea ja uskottavuusfunktio on integroituva pätee $p(x_k|x_{1:k-1},y_{k}) \propto p(y_k|x_k)$, jolloin voidaan asettaa (\ref{uskottavuusotanta-q})
 
 \begin{align}\label{uskottavuusotanta-q}
 q(x_k|x_{1:k-1},y_{k}) \propto p(y_k|x_k).
 \end{align}
 
-Tässä tapauksessa vaaditaan lisäksi, että uskottavuusfunktio on integroituva.
+Yhtälön (\ref{uskottavuusotanta-q}) perusteella saadaan edelleen uskottavuusotannan painoiksi (\ref{uskottavuusotanta-w}).
+
+\begin{align}\label{uskottavuusotanta-w}
+w^i_{k|k} = w^i_{k-1|k-1}p(x^i_k|x^i_{k-1}).
+\end{align}
 
 ## Konvergenssituloksia
 
@@ -218,29 +271,32 @@ Konvergenssituloksia ei tämän tutkielman puitteissa todisteta.
 
 Edellä kuvattu algoritmi 1 tuottaa approksimaation koko prosessin posteriorijakaumalle $p(x_{1:k}|y_{1:k})$. Jos halutaan tietää ainoastaan posteriorijakauman $p(x_k|y_{1:k})$ estimaatti, voidaan käyttää ainoastaan viimeisestä tilasta $x_k^i$ laskettua estimaattia 
 
-$$
+\begin{align}
 \hat{p}(x_{k}|y_{1:k})=\sum_{i=1}^{N}w_{k|k}^i \delta(x_{k}-x_{k}^i).
-$$
+\end{align}
 
 Toinen vaihtoehto on käyttää laskennassa tärkeytyspainoa
 
-$$
+\begin{align}
 w_{k+1|k}^i=\frac{\sum_{j=1}^{N}w_{k|k}^jp(x_{k+1}^i|x_k^j)}{q(x_{k+1}^i|x_k^i,y_{k+1})}
-$$
+\end{align}
 
 yllä esitetyn sijaan. Tällöin jokaisessa aikapäivitysaskeleessa lasketaan painot kaikkien mahdollisten tila-aika-avaruuspolkujen yli. Samoin kuin uudelleenotanta tämä pienentää painojen varianssia.
 
 ## Aikakompleksisuus
 
-Algoritmin perusmuodon aikakompleksisuus on $\mathcal{O}(N)$. Uudelleenotantamenetelmän tai ehdotusjakauman valinta ei suoraan vaikuta aikakompleksisuuteen. Sen sijaan marginalisointi edellä esitetyllä tärkeytyspainolla lisää algoritmin aikakompleksisuutta $\mathcal{O}(N)\rightarrow\mathcal{O}(N^2)$, koska jokaisen partikkelin kohdalla painot lasketaan jokaisen tila-aika-avaruuspolun yli. On selvää, että erityisesti isoilla otoskoon $N$ arvoilla ei yllä esitetty marginalisointi enää ole mielekästä. Tällaisia tilanteita varten esitetään alla vielä $\mathcal{O}(N\text{log}(N))$ versio marginaalihiukkassuotimesta. Esitys noudattaa Klaas &al. artikkelia "Toward Practical $N^2$ Monte Carlo: the Marginal Particle Filter" (2012). Algoritmin tehokkaaseen toteutukseen R-kielellä palataan luvussa [Paikannusesimerkki].
+T. SUORITUSKYKY. Algoritmin perusmuodon aikakompleksisuus on $\mathcal{O}(N)$. Uudelleenotantamenetelmän tai ehdotusjakauman valinta ei suoraan vaikuta aikakompleksisuuteen. Sen sijaan marginalisointi edellä esitetyllä tärkeytyspainolla lisää algoritmin aikakompleksisuutta $\mathcal{O}(N)\rightarrow\mathcal{O}(N^2)$, koska jokaisen partikkelin kohdalla painot lasketaan jokaisen tila-aika-avaruuspolun yli. On selvää, että erityisesti isoilla otoskoon $N$ arvoilla ei yllä esitetty marginalisointi enää ole mielekästä. Tällaisia tilanteita varten esitetään alla vielä $\mathcal{O}(N\text{log}(N))$ versio marginaalihiukkassuotimesta. Esitys noudattaa Klaas &al. artikkelia "Toward Practical $N^2$ Monte Carlo: the Marginal Particle Filter" (2012). Algoritmin tehokkaaseen toteutukseen R-kielellä palataan luvussa [Paikannusesimerkki].
+
+BATCH VS ONLINE.
 
 # Paikannusesimerkki 
 
-Esimerkissä käyteteään SMC-algoritmia Bluetooth-paikannussovelluksessa paikannustarkkuuden parantamiseen. Paikannusdata kerätään toimistoympäristössä liikkuvien BLE-lähettimien sekä kattoon sijoitettujjen vastaanottimien avulla. **kerättyjä BLE5.1-standardin mukaisia signaalin tulokulmahavaintoja eli AoA-havaintoja (angle of arrival). Paikannukseen käytetään triangulaatio-algoritmia. Lopuksi esimerkissä analysoidaan ja vertaillaan algoritmin eri versioiden suorituskykyä sekä suorituskyvyn että paikannustarkkuuden näkökulmasta.
+Esimerkissä käyteteään SMC-algoritmia Bluetooth-paikannussovelluksessa paikannustarkkuuden parantamiseen. Paikannukseen käytettävä data kerätään toimistoympäristössä liikkuvien BLE-lähettimien sekä kattoon sijoitettujen vastaanottimien avulla. Havainnot koostuvat vastaanottimien lähettimien signaalien perusteella laskemista, BLE5.1-standardin mukaisista signaalin tulokulmista eli AoA-havainnoista (angle of arrival). Paikannukseen käytetään triangulaatio-algoritmia. Lopuksi esimerkissä analysoidaan ja vertaillaan algoritmin eri versioiden suorituskykyä sekä suorituskyvyn että paikannustarkkuuden näkökulmasta.
 
 ## Koeasetelma
 
-Lähettimenä toimii Lähettimenä toimi 25 Bluetooth-paikannustagista koostuva Walkbase Foculator -testilaite.
+Lähettimenä toimii Lähettimenä toimi 25 Bluetooth-paikannustagista koostuva Walkbase Foculator -testilaite (kuvat 1 ja 2).
+
 
 KARTTA, jossa sensorit.
 
@@ -253,7 +309,7 @@ Dataa kerättiin. Data kerättiin yöaikaan, jolloin toimiston käyttöaste oli 
 
 Riippuen päällä olevien paikannustagien lukumäärästä, tuottaa n. havainto sekunnissa. Havaintoja on $N_{obs}=$ kappaletta. Jokainen havainto koostuu taulukossa \ref{tab:muuttujat} kuvatuista muuttujista.
 
-\begin{table}[hp]
+\begin{table}[H]
 \centering
 \begin{tabular}{|l|l|l|}
 \hline
@@ -267,9 +323,9 @@ rssi & signaalin vahvuus (dBm) & -81\\
 azimuth\_angle & atsimuuttikulma $\phi$ (astetta) & 102.7\\
 converted\_angle & napapohjoisesta laskettu kulma $\Phi$ (astetta) & 34\\
 elevation\_angle & korkeuskulma (astetta) & 11.9\\
-quality\_ant\_phase\_jitter & antennikohtainen jitter & {0.15,0.15,0.15,0.15,0.14,0.16,0.29,0.34}\\
+quality\_ant\_phase\_jitter & antennikohtainen jitter & \makecell[l]{ (0.15,0.15,0.15,0.15,\\0.14,0.16,0.29,0.34)}\\
 ss\_jitter & jitter-arvojen neliösumma & 0.3349\\
-quality\_ant\_snr & antennikohtainen signaali-kohinasuhde & {24.76,37.48,40.75,36.\newline 37,28.5,28.2,16.15,11.27}\\
+quality\_ant\_snr & antennikohtainen signaali-kohinasuhde & \makecell[l]{ (24.76,37.48,40.75,36.37\\ 28.5,28.2,16.15,11.27)}\\
 snr\_jitter & signaali-kohinasuhteiden neliösumma & 6996.473\\
 \hline
 \end{tabular}
@@ -282,8 +338,6 @@ Atsimuuttikulma $\phi$ lasketaan aina vastaanottimen tietyltä sivulta, joten se
 \begin{align}
 \Phi=(\phi + \eta+360) \hspace{0.1cm} \% \hspace{0.1cm}360.
 \end{align}
-
-Kulmamuunnos tehdään paikannusalgoritmia suoritettaessa.
 
 ## Malli
 
