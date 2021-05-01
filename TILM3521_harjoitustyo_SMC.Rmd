@@ -14,6 +14,7 @@ header-includes:
    - \usepackage[ruled,vlined]{algorithm2e} 
    - \usepackage{graphicx}
    - \usepackage{multicol}
+   - \usepackage{gensymb}
    - \graphicspath{ {./images/} }
    - \usetikzlibrary{shapes.geometric,arrows}
    - \def\TikZ{Ti\emph{k}Z\ }
@@ -313,7 +314,7 @@ Yhtälön (\ref{prioriotanta-q}) perusteella saadaan edelleen prioriotannan pain
 w^i_{k|k} = w^i_{k|k-1}p(y_k|x^i_k) = w^i_{k-1|k-1}p(y_k|x^i_k).
 \end{align}
 
-Kun taas signaali-kohinasuhde on kohtalainen tai korkea, on parempi käyttää ehdotusjakaumana skaalattua uskottavuusfunktiota (\ref{uskottavuusotanta-q}). Tarkastellaan ensin tekijöihin jakoa (\{uskottavuusotanta-factorization}).
+Kun taas signaali-kohinasuhde on kohtalainen tai korkea, on parempi käyttää ehdotusjakaumana skaalattua uskottavuusfunktiota (\ref{uskottavuusotanta-q}). Tarkastellaan ensin tekijöihin jakoa (ref\{uskottavuusotanta-factorization}).
 
 \begin{align}\label{uskottavuusotanta-factorization}
 p(x_k|x^i_{k-1},y_k)=p(y_k|x_k)\frac{p(x_k|x^i_{k-1})}{p(y_k|x^i_{k-1})}
@@ -367,11 +368,15 @@ BATCH VS ONLINE.
 
 # Paikannusesimerkki 
 
+Sisätilapaikannus *** on BLAHBLAHBLAH. Koska GPS ei toimi sisätiloissa, tarvitaan muita paikannusratkaisuja. Radiosignaaleihin perustuvat paikannusratkaisut ovat BLAHBLABH. Eräs mahdollinen XXX, jossa käytetään tulokulmaa paikantamaan. Walkbase käyttää XXX erityisesti ruokakaupoissa ja tavarataloissa XXX ostoskärryihin ja -koreihin XXX keräämään tärkeää paikannusdataa asiakkaiden XXX. Markkinoilla on XXX on Walkbase kehittänyt oman laitteistoratkaisunsa.
+
 Esimerkissä käyteteään SMC-algoritmia Bluetooth-paikannussovelluksessa paikannustarkkuuden parantamiseen. Paikannukseen käytettävä data kerätään toimistoympäristössä liikkuvien BLE-lähettimien sekä kattoon sijoitettujen vastaanottimien avulla. Havainnot koostuvat vastaanottimien lähettimien signaalien perusteella laskemista, BLE5.1-standardin mukaisista signaalin tulokulmista eli AoA-havainnoista (angle of arrival). Paikannukseen käytetään triangulaatio-algoritmia. Lopuksi esimerkissä analysoidaan ja vertaillaan algoritmin eri versioiden suorituskykyä sekä suorituskyvyn että paikannustarkkuuden näkökulmasta.
 
 ## Koeasetelma
 
-Paikaunnusesimerkissä lähettimenä toimi 25 Bluetooth-paikannustagista koostuva Walkbase Foculator -testilaite (kuva \ref{fig:foculator}), vastaanottimena puolestaan toimistoympäristöön asennetut seitsemän Walkbase XR-2 -vastaanotinta (kuva \ref{fig:xr2}). Jokainen vastaanotin sisältää kahdeksan antennia, joiden havaintojen perusteella vastaanottimet laskevat XXX tulokulman. Data on kuvattu tarkemmin alaluvussa 4.2. Koeympäristön kartta on kuvattuna kaaviossa 1.
+Paikaunnusesimerkissä lähettimenä toimi 25 Bluetooth-paikannustagista koostuva Walkbase Foculator -testilaite (kuva \ref{fig:foculator}), vastaanottimena puolestaan toimistoympäristöön asennetut seitsemän Walkbase XR-2 -vastaanotinta (kuva \ref{fig:xr2}). Jokainen vastaanotin sisältää kahdeksan antennia, XXX havaintojen perusteella vastaanottimet laskevat XXX tulokulman. XXX. Esteettömässä ympäristö paikannus XXX suodatinta ei tarvita. Toimistoympäristö on kuitenkin haastava, sillä erityisesti nä XXX mikä tarjoaa motivaation SMC-menetelmien käyttämiseen.
+
+Data on kuvattu tarkemmin alaluvussa 4.2. Koeympäristön kartta on kuvattuna kaaviossa 1.
 
 \begin{multicols}{2}
 \begin{figure}[H]
@@ -395,14 +400,13 @@ Toimistympäristön KARTTA, jossa sensorit.
 site_map
 ```
 
-
 TRAJECTORY. jotka MITÄ. 
 
 Dataa kerättiin. Data kerättiin yöaikaan, jolloin toimiston käyttöaste oli minimissä. Tällä minimoitiin radiosignaalin tielle osuvien ihmisten vaikutus tuloksiin.
 
 ## Datan kuvaus
 
-Riippuen päällä olevien paikannustagien lukumäärästä, tuottaa n. havainto sekunnissa. Havaintoja on $N_{obs}=$ kappaletta. Jokainen havainto koostuu taulukossa \ref{tab:muuttujat} kuvatuista muuttujista.
+Riippuen päällä olevien paikannustagien lukumäärästä, tuottaa n. havainto sekunnissa. Havaintoja on $N_{obs}=X$ kappaletta, joka kattaa $Y$ minuuttia. Havaintojen aikaleimat on tallennettu sekunnin tuhannesosan tarkkuudella. Jokainen havainto koostuu taulukossa \ref{tab:muuttujat} kuvatuista muuttujista.
 
 \def\arraystretch{1.25} 
 \begin{table}[H]
@@ -415,9 +419,12 @@ ts & havainnon aikaleima & 21:38:20.998+00\\
 asset\_tag\_mac & lähettimen MAC-osoite & 5c:02:72:67:f7:4c\\
 locator\_mac & vastaanottimen MAC-osoite & b8:27:eb:66:0d:2a\\
 bearing & suuntimakulma $\eta$ (astetta) & 34\\
+height & vastaanottimen korkeus (m) & 2.22 \\
 rssi & signaalin vahvuus (dBm) & -81\\
+distance & arvioitu etäisyys lähettimeen (m) & 13.5\\
 azimuth\_angle & atsimuuttikulma $\phi$ (astetta) & 102.7\\
 converted\_angle & napapohjoisesta laskettu kulma $\Phi$ (astetta) & 34\\
+\makecell[tl]{opposite\_angle} & \makecell[tl]{vastakkainen kulma\\ (lähetin-vastaanotin) $\Phi^\prime$ (radiaania)} & \makecell[tl]{3.735}\\
 elevation\_angle & korkeuskulma (astetta) & 11.9\\
 \makecell[tl]{quality\_ant\_phase\_jitter} & \makecell[tl]{antennikohtainen jitter} & \makecell[tl]{ (0.15,0.15,0.15,0.15,\\0.14,0.16,0.29,0.34)}\\
 ss\_jitter & antennikohtaisten jitter-arvojen neliösumma & 0.3349\\
@@ -429,11 +436,39 @@ ss\_jitter & antennikohtaisten jitter-arvojen neliösumma & 0.3349\\
 \label{tab:muuttujat}
 \end{table}
 
+Etäisyys on estimoitu signaalin vahvuudesta käyttäen valmistajan omaa, tuntematonta propagaatiomallia. Etäisyyttä tai signaalin vahvuutta ei käytetä paikantamiseen, joten tämän mallin käsittely jätetään tutkielman ulkopuolelle. Munoz (2009) luku 2 sisältää yleiskatsauksen myös propagaatiomalleihin.
+
 Atsimuuttikulma $\phi$ lasketaan aina vastaanottimen tietyltä sivulta, joten se vastaa napapohjoista ainoastaan siinä tapauksessa, että vastaanottimen kyseinen sivu on asetettu kohtisuoraan napapohjoiseen nähden. Käytännön syistä tämä ei ole aina mahdollista eikä edes haluttavaa. Sen vuoksi jokaiselle vastaanottimelle on tietokantaan tallennettu oma suuntimakulma $\eta$. Triangulaatiossa alla käytetään napapohjoisesta laskettuja kulmia $\Phi$, jotka lasketaan jokaiselle havainnolle havainnon vastaanottimen suuntimakulman avulla
 
 \begin{align}
-\Phi=(\phi + \eta+360) \hspace{0.1cm} \% \hspace{0.1cm}360.
+\Phi=(\phi + \eta+360^\degree) \mod360^\degree.
 \end{align}
+
+Suuntimakulma $\Phi$ kertoo kuitenkin vastaanottimen ja lähettimen välisen kulman. Koske olemme kiinnostuneet paikantamaan lähetintä, lasketaan yhtälöllä (\ref{vastakkainen-kulma}) suuntimakulman perusteella edelleen lähettimen ja vastaanottimen välinen kulma $\Phi^\prime$. Samalla asteissa oleva kulma muunnetaan radiaaneiksi paikannusta varten.
+
+\begin{align}\label{vastakkainen-kulma}
+\Phi^\prime=\frac{\pi}{180^\degree}(\Phi+180^\degree \mod360^\degree).
+\end{align}
+
+Lisäksi havainnot sisältävät antennikohtaiset jitter- ja SNR-arvot sekä näistä lasketut neliösummat. Havaintomuuttujien ohella koetilanteessa tallennettiin Foculator-testilaitteen todellinen sijainti sekunnin tarkkuudella. Tallennettu sijainti perustui koeympäristön lattiaan pohjapiirrustusten ja laser-mittausten avulla tehtyihin merkintöihin. Näin saadut testimuuttujat on kuvattu taulukossa (\ref{tab:testimuuttujat}).
+
+\def\arraystretch{1.25} 
+\begin{table}[H]
+\centering
+\begin{tabular}{|l|l|l|}
+\hline
+Muuttuja & Kuvaus & Esimerkkiarvo\\
+\hline
+foculator\_ts & aikaleima & 21:38:20+00\\
+foculator\_lat & testilaitteen sijainti (leveyspiiri) & 60.44819 \\
+foculator\_long & testilaitteen sijainti (pituuspiiri) & 22.29493 \\
+\hline
+\end{tabular}
+\caption{Testimuuttujat}
+\label{tab:testimuuttujat}
+\end{table}
+
+Testimuuttujia käytetään alla SMC-paikannusalgoritmin paikannusvirheen laskemisessa. 
 
 ## Malli
 
@@ -453,6 +488,7 @@ Tutkielmassa on lisäksi tarkasteltu miten eri valinnat vaikuttavat algoritmin s
 
 - Chen & Liu (1998): **Sequential Monte Carlo Methods for Dynamic Systems**. [http://stat.rutgers.edu/home/rongchen/publications/98JASA_SMC.pdf](http://stat.rutgers.edu/home/rongchen/publications/98JASA_SMC.pdf)
 - Dahlin & Schön (2019): **Getting Started with Particle Metropolis-Hastings for Inference in Nonlinear Dynamical Models**. [https://arxiv.org/pdf/1511.01707.pdf](https://arxiv.org/pdf/1511.01707.pdf).
+- Munoz, Bouchereau Lara, Vargas & Enriquez-Caldera (2009): **Position Location Techniques and Applications**. Elsevier.
 - Del Moral (1996): **Nonlinear Filtering: Interacting Particle Resolution**. [https://people.bordeaux.inria.fr/pierre.delmoral/delmoral96nonlinear.pdf](https://people.bordeaux.inria.fr/pierre.delmoral/delmoral96nonlinear.pdf).
 - Gordon, Salmond & Smith (1993): **Novel approach to nonlinear/non-Gaussian Bayesian state estimation**. [http://www.irisa.fr/aspi/legland/ref/gordon93a.pdf](http://www.irisa.fr/aspi/legland/ref/gordon93a.pdf).
 - Gustafsson (2010): **Particle Filter Theory and
