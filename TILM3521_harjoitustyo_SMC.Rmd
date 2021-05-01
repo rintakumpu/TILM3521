@@ -8,6 +8,8 @@ header-includes:
    - \usepackage{xspace}
    - \usepackage{tikz-cd}
    - \usepackage{mathtools}
+   - \usepackage{mathrsfs}
+   - \usepackage{commath}
    - \usepackage{pict2e}
    - \usepackage{float}
    - \usepackage{array, makecell}
@@ -334,13 +336,17 @@ w^i_{k|k} = w^i_{k-1|k-1}p(x^i_k|x^i_{k-1}).
 
 ## Konvergenssituloksia
 
-Alla esitetään kaksi algoritmiin liittyvää konvergenssitulosta, se kuinka hyvin esitetyllä SMC-algoritmilla arvioitu posterioritiheys $\hat{p}(x_{1:k}|y_{1:k})$ approksimoi todellista tiheysfunktiota $p(x_{1:k}|y_{1:k})$ sekä mikä on approksimaation keskineliövirhe. Tulokset noudattavat Crisanin ja Doucet'n artikkelia "Convergence of Sequential Monte Carlo Methods" (2000).
+Alla esitetään kaksi algoritmiin liittyvää konvergenssitulosta, se kuinka hyvin esitetyllä SMC-algoritmilla arvioitu posterioritiheys $\hat{p}(x_{1:k}|y_{1:k})$ approksimoi todellista tiheysfunktiota $p(x_{1:k}|y_{1:k})$ sekä mikä on approksimaation keskineliövirhe. Tulokset noudattavat Crisanin ja Doucet'n artikkeleita "Convergence of Sequential Monte Carlo Methods" (2000) ja "A Survey of Convergence Results on Particle Filtering Methods for Practitioners" (2002).
 
 *Konvergenssitulos 1*: Kun $N \rightarrow \infty$ algoritmille pätee $\forall k$ tulos $\hat{p}(x_{1:k}|y_{1:k}) \xrightarrow{a.s.} p(x_{1:k}|y_{1:k})$.
 
-*Konvergenssitulos 2*: MSE-konvergenssi.
+*Konvergenssitulos 2*: Keskineliövirheelle pätee asymptoottinen konvergenssi (\ref{MSE-konvergenssi}).
 
-Konvergenssituloksia ei tämän tutkielman puitteissa todisteta.
+\begin{align}\label{MSE-konvergenssi}
+\mathbb{E}(\hat{g}(x_k)-\mathbb{E}(g(x_k)))^2\leq\frac{p_k\norm{g(x_k)}}{N}.
+\end{align}
+
+Missä $g$ on mikä hyvänsä piilossa olevan tila-avaruuden rajoitettu Borel-mitallinen funktio ($g \in \mathcal{B}(\mathbb{R}^{n_x})$), $\norm{g(\cdot)}$ kyseisen funktion supremum-normi ja $p_k$ jokin äärellinen vakio, jolle pätee ajanhetkestä $k$ riippumatta $p_k=p<\infty$. Konvergenssituloksia ei tämän tutkielman puitteissa todisteta.
 
 ## Marginaalijakauma
 
@@ -358,13 +364,13 @@ w_{k+1|k}^i=\frac{\sum_{j=1}^{N}w_{k|k}^jp(x_{k+1}^i|x_k^j)}{q(x_{k+1}^i|x_k^i,y
 
 yllä esitetyn sijaan. Tällöin jokaisessa aikapäivitysaskeleessa lasketaan painot kaikkien mahdollisten tila-aika-avaruuspolkujen yli. Samoin kuin uudelleenotanta tämä pienentää painojen varianssia.
 
-## Aikakompleksisuus
+## Aikakompleksisuus 
 
-T. SUORITUSKYKY. Algoritmin perusmuodon aikakompleksisuus on $\mathcal{O}(N)$. Uudelleenotantamenetelmän tai ehdotusjakauman valinta ei suoraan vaikuta aikakompleksisuuteen. Sen sijaan marginalisointi edellä esitetyllä tärkeytyspainolla lisää algoritmin aikakompleksisuutta $\mathcal{O}(N)\rightarrow\mathcal{O}(N^2)$, koska jokaisen partikkelin kohdalla painot lasketaan jokaisen tila-aika-avaruuspolun yli. On selvää, että erityisesti isoilla otoskoon $N$ arvoilla ei yllä esitetty marginalisointi enää ole mielekästä. 
+Algoritmin perusmuodon aikakompleksisuus on $\mathcal{O}(N)$. Uudelleenotantamenetelmän tai ehdotusjakauman valinta ei suoraan vaikuta aikakompleksisuuteen. Sen sijaan marginalisointi edellä esitetyllä tärkeytyspainolla lisää algoritmin aikakompleksisuutta $\mathcal{O}(N)\rightarrow\mathcal{O}(N^2)$, koska jokaisen partikkelin kohdalla painot lasketaan jokaisen tila-aika-avaruuspolun yli. On selvää, että erityisesti isoilla otoskoon $N$ arvoilla ei yllä esitetty marginalisointi enää ole mielekästä. 
 
 Tällaisia tilanteita varten SMC-algoritmista on olemassa $\mathcal{O}(N\text{log}(N))$ -versioita, jotka perustuvat N:n kappaleen oppimiseen (N-body learning). Näiden algoritmien käsittely jää tämän tutkielman ulkopuolelle, mutta katsaus algoritmeista on esitetty esimerkiksi Klaas &al. artikkelissa "Toward Practical $N^2$ Monte Carlo: the Marginal Particle Filter" (2012). 
 
-BATCH VS ONLINE.
+Lisäksi algoritmin aikakompleksisuuteen vaikuttavat seuraavat seikat. T. SUORITUSKYKY. BATCH VS ONLINE. Kun halutaan on-line-estimointia, siinä missä off-line-estimointiin.
 
 # Paikannusesimerkki 
 
@@ -487,6 +493,8 @@ Tutkielmassa on lisäksi tarkasteltu miten eri valinnat vaikuttavat algoritmin s
 # Lähteet    
 
 - Chen & Liu (1998): **Sequential Monte Carlo Methods for Dynamic Systems**. [http://stat.rutgers.edu/home/rongchen/publications/98JASA_SMC.pdf](http://stat.rutgers.edu/home/rongchen/publications/98JASA_SMC.pdf)
+- Crisan & Doucet (2000): **Convergence of Sequential Monte Carlo Methods**. [http://www.stats.ox.ac.uk/~doucet/crisain_doucet_convergenceofSMC2000.pdf](http://www.stats.ox.ac.uk/~doucet/crisain_doucet_convergenceofSMC2000.pdf)
+- Crisan & Doucet (2002): **A Survey of Convergence Results on Particle Filtering Methods for Practitioners**. [https://www.researchgate.net/publication/3318241_A_Survey_of_Convergence_Results_on_Particle_Filtering_Methods_for_Practitioners](https://www.researchgate.net/publication/3318241_A_Survey_of_Convergence_Results_on_Particle_Filtering_Methods_for_Practitioners)
 - Dahlin & Schön (2019): **Getting Started with Particle Metropolis-Hastings for Inference in Nonlinear Dynamical Models**. [https://arxiv.org/pdf/1511.01707.pdf](https://arxiv.org/pdf/1511.01707.pdf).
 - Munoz, Bouchereau Lara, Vargas & Enriquez-Caldera (2009): **Position Location Techniques and Applications**. Elsevier.
 - Del Moral (1996): **Nonlinear Filtering: Interacting Particle Resolution**. [https://people.bordeaux.inria.fr/pierre.delmoral/delmoral96nonlinear.pdf](https://people.bordeaux.inria.fr/pierre.delmoral/delmoral96nonlinear.pdf).
