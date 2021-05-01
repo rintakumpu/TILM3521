@@ -99,13 +99,21 @@ site_map <- ggplot(zones_for_plotting, aes(group=id, x = x, y = y)) + geom_polyg
 locators_subset <- subset(locators, mac %in% locator_macs)
 # Locator coordinates
 locators_xy_original <- points_as_points(locators_subset, "position")
+locators_xy_original$mac <- locators[locators$id %in% locators_xy_original$id,"mac"]
+locators_xy_original$label <- as.character(1:nrow(locators_xy_original))
 locators_xy<- locators_xy_original
 locators_xy$x <- locators_xy$x - 0.00012
 locators_xy$y <- locators_xy$y + 0.000123
 # And plot
-for(i in 1:nrow(locators_xy)) {
-  site_map <- site_map + annotate("point", x=locators_xy[i,"x"], y=locators_xy[i,"y"], color="cyan", size=5) + annotate("text", x=locators_xy[i,"x"], y=locators_xy[i,"y"], label=locators_xy[i,"id"], size=3)
-}
+site_map <- site_map + geom_point(data=locators_xy, aes(x = x, y = y, fill = label), size = 5, colour="tomato") +  geom_text(data=locators_xy, aes(label = label, x = x, y = y), color="white", size=3) + guides(fill=guide_legend(keywidth=unit(0,"mm"), override.aes=list(size=0, colour=NA))) + scale_fill_discrete(labels=paste(1:nrow(locators_xy_original), "=", locators_xy$mac)) + labs(fill="XR-2 MAC")
+
+# Add locator legend
+site_map <- site_map + theme(
+    legend.position = c(.95, .95),
+    legend.justification = c("right", "top"),
+    legend.box.just = "right",
+    legend.margin = margin(6, 6, 6, 6)
+    ) + scale_color_manual(values = c(rep('tomato', 12)), name = 'XR-2-vastaanotin')
 
 # Foculator position 1
 #site_map <- site_map + annotate("point", y=60.44819, x=22.29489, color="magenta", size=3)
@@ -380,9 +388,9 @@ Esimerkissä käyteteään SMC-algoritmia Bluetooth-paikannussovelluksessa paika
 
 ## Koeasetelma
 
-Paikaunnusesimerkissä lähettimenä toimi 25 Bluetooth-paikannustagista koostuva Walkbase Foculator -testilaite (kuva \ref{fig:foculator}), vastaanottimena puolestaan toimistoympäristöön asennetut seitsemän Walkbase XR-2 -vastaanotinta (kuva \ref{fig:xr2}). Jokainen vastaanotin sisältää kahdeksan antennia, XXX havaintojen perusteella vastaanottimet laskevat XXX tulokulman. XXX. Esteettömässä ympäristö paikannus XXX suodatinta ei tarvita. Toimistoympäristö on kuitenkin haastava, sillä erityisesti nä XXX mikä tarjoaa motivaation SMC-menetelmien käyttämiseen.
+Paikaunnusesimerkissä lähettimenä toimi 25 Bluetooth-paikannustagista koostuva Walkbase Foculator -testilaite (kuva \ref{fig:foculator}), vastaanottimena toimistoympäristöön asennetut seitsemän Walkbase XR-2 -vastaanotinta (kuva \ref{fig:xr2}). Jokainen vastaanotin sisältää kahdeksan antennia, joiden vastaanottamien lähetinsignaalien perusteella vastaanottimet laskevat signaalin tulokulman suhteessa vastaanottimeen. Tarkka tulokulmien laskemiseen käytetty algoritmi on paikantimen antennit toimittaneen Silicon Laboratories, Inc. -yrityksen liikesalaisuus, mutta ***perusperiaate on. AoA relies on a single-antenna transmit beacon with continuous tone extension appended to a Bluetooth packet transmission and a locator receiver device to measure the arrival angle of the signal using an array of antennas. Each antenna in the array sees phase differences due to different line of sight distances to the beacon device. The antennas in the array are switched during continuous tone extension, resulting in IQ samples with phase information for each antenna. This IQ-data is fed to an angle estimator algorithm. In this AoA use case, the receiving device tracks arrival angles for individual transmit beacon objects.
 
-Data on kuvattu tarkemmin alaluvussa 4.2. Koeympäristön kartta on kuvattuna kaaviossa 1.
+Esteettömässä ympäristössä XXX kulman virhe on hyvin pieni ja paikannusongelma voidaan ratkaista suoraan jollakin triangulaatio-algoritmilla. Eräänä XXX ToTal-algoritmia. Tässäkin tilanteessa voi paikannusta parantaa suodattimen käytöllä, mutta jo triangulaatioä-algoritmin perusversio tuottaa halutun tarkkuuden. Toimistoympäristö on kuitenkin haastava, sillä erityisesti näyttöruudut sekä heijastavat että estävät radiosignaaleja. Silicon Labs lupaa omalle AoA-järjestelmälleen vastaavassa toimisympäristössä (seitsemällä paikantimella) kulmavirheen välillä $\pm 3.7-5.7$. Tämä ei kuitenkaan riitä johdonmukaisesti haluttuun alle metrin paikannustarkkuuteen, joten AoA-paikannus toimistoympäristössä tarjoaa hyvän motivaation SMC-menetelmien käyttämiseen.
 
 \begin{multicols}{2}
 \begin{figure}[H]
@@ -400,15 +408,16 @@ Data on kuvattu tarkemmin alaluvussa 4.2. Koeympäristön kartta on kuvattuna ka
 \end{figure}
 \end{multicols}
 
-Toimistympäristön KARTTA, jossa sensorit.
+Data on kuvattu tarkemmin alaluvussa 4.2. Koeympäristön pohjapiirustus on esitetty kuvassa (\ref{fig:pohjapiirustus}). Piirustuksessa XR-2-paikantimet on kuvattu punaisilla ympyröillä. Foculator-testilaitteen liikerata on kuvattu sinisellä viivalla. Toimistoympäristön pohjapiirustus on kuvattu harmaalla niin, että piirustuksesta erottuvat toimiston väliseinät.
 
-```{r eval=F}
-site_map
-```
+\begin{figure}[H]
+\centering
+\includegraphics[width=16cm]{office_map}
+\caption{Koeasetelman pohjapiirustus}
+\label{fig:pohjapiirustus}
+\end{figure}
 
-TRAJECTORY. jotka MITÄ. 
-
-Dataa kerättiin. Data kerättiin yöaikaan, jolloin toimiston käyttöaste oli minimissä. Tällä minimoitiin radiosignaalin tielle osuvien ihmisten vaikutus tuloksiin.
+Ennen datan keräämistä testilaite asennettiin kiinni robottiin (kuva Z), joka oli ohjelmoitu ennalta seuraamaan haluttua liikerataa vastaavia lattiamerkintöjä ennalta määrätyllä nopeudella $Xm/s$. Kyseinen liikerata on merkitty koeympäristön pohjapiirustukseen sinisellä viivalla. Data kerättiin sinä aikana, kun robotti liikkui liikeradan lähtöpisteestä (piste A) liikeradan maalipisteeseen (piste B). Robotilta kului matkaan $X$ sekuntia. Data kerättiin yöaikana, jolloin toimiston käyttöaste oli minimissä. Tällä minimoitiin radiosignaalin tielle osuvien ihmisten vaikutus radiosignaaleihin.
 
 ## Datan kuvaus
 
