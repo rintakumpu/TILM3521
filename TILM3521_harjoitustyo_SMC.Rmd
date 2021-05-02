@@ -382,7 +382,7 @@ Lisäksi algoritmin aikakompleksisuuteen vaikuttavat seuraavat seikat. T. SUORIT
 
 # Paikannusesimerkki 
 
-Sisätilapaikannus *** on BLAHBLAHBLAH. Koska GPS ei toimi sisätiloissa, tarvitaan muita paikannusratkaisuja. Radiosignaaleihin perustuvat paikannusratkaisut ovat BLAHBLABH. Eräs mahdollinen XXX, jossa käytetään tulokulmaa paikantamaan. Walkbase käyttää XXX erityisesti ruokakaupoissa ja tavarataloissa XXX ostoskärryihin ja -koreihin XXX keräämään tärkeää paikannusdataa asiakkaiden XXX. Markkinoilla on XXX on Walkbase kehittänyt oman laitteistoratkaisunsa.
+Sisätilapaikannus *** on BLAHBLAHBLAH. Koska GPS ei toimi sisätiloissa, tarvitaan muita paikannusratkaisuja. Radiosignaaleihin perustuvat paikannusratkaisut ovat BLAHBLABH. Eräs mahdollinen XXX, jossa käytetään tulokulmaa paikantamaan. Walkbase käyttää sisätilapaikannusta erityisesti ruokakaupoissa sekä tavarataloissa asiakkaiden käyttäytymistä koskevan keräämiseen. Tyypillinen .. XXX ostoskärryihin ja -koreihin XXX keräämään tärkeää paikannusdataa asiakkaiden XXX. Markkinoilla on XXX on Walkbase kehittänyt oman laitteistoratkaisunsa. SKENAARIOISSA TARVITAAN Tavoitteena on alle metrin paikannusvirhe.
 
 Esimerkissä käyteteään SMC-algoritmia Bluetooth-paikannussovelluksessa paikannustarkkuuden parantamiseen. Paikannukseen käytettävä data kerätään toimistoympäristössä liikkuvien BLE-lähettimien sekä kattoon sijoitettujen vastaanottimien avulla. Havainnot koostuvat vastaanottimien lähettimien signaalien perusteella laskemista, BLE5.1-standardin mukaisista signaalin tulokulmista eli AoA-havainnoista (angle of arrival). Paikannukseen käytetään triangulaatio-algoritmia. Lopuksi esimerkissä analysoidaan ja vertaillaan algoritmin eri versioiden suorituskykyä sekä suorituskyvyn että paikannustarkkuuden näkökulmasta.
 
@@ -402,7 +402,7 @@ Esteettömässä ympäristössä XXX kulman virhe on hyvin pieni ja paikannusong
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=7cm]{foculator}
+\includegraphics[width=7cm]{xr_2}
 \caption{Walkbase XR-2}
 \label{fig:xr2}
 \end{figure}
@@ -417,7 +417,16 @@ Data on kuvattu tarkemmin alaluvussa 4.2. Koeympäristön pohjapiirustus on esit
 \label{fig:pohjapiirustus}
 \end{figure}
 
-Ennen datan keräämistä testilaite asennettiin kiinni robottiin (kuva Z), joka oli ohjelmoitu ennalta seuraamaan haluttua liikerataa vastaavia lattiamerkintöjä ennalta määrätyllä nopeudella $Xm/s$. Kyseinen liikerata on merkitty koeympäristön pohjapiirustukseen sinisellä viivalla. Data kerättiin sinä aikana, kun robotti liikkui liikeradan lähtöpisteestä (piste A) liikeradan maalipisteeseen (piste B). Robotilta kului matkaan $X$ sekuntia. Data kerättiin yöaikana, jolloin toimiston käyttöaste oli minimissä. Tällä minimoitiin radiosignaalin tielle osuvien ihmisten vaikutus radiosignaaleihin.
+Ennen datan keräämistä testilaite asennettiin kiinni robottiin (kuva \ref{robotti}), joka oli ohjelmoitu ennalta seuraamaan haluttua liikerataa vastaavia lattiamerkintöjä ennalta määrätyllä nopeudella $Xm/s$. Kyseinen liikerata on merkitty koeympäristön pohjapiirustukseen sinisellä viivalla. Data kerättiin sinä aikana, kun robotti liikkui liikeradan lähtöpisteestä (piste A) liikeradan maalipisteeseen (piste B). Robotilta kului matkaan $X$ sekuntia. 
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=7cm]{robotti}
+\caption{Testirobotti}
+\label{fig:robotti}
+\end{figure}
+
+Data kerättiin yöaikana, jolloin toimiston käyttöaste oli minimissä. Tällä minimoitiin radiosignaalin tielle osuvien ihmisten vaikutus radiosignaaleihin.
 
 ## Datan kuvaus
 
@@ -433,6 +442,8 @@ Muuttuja & Kuvaus & Esimerkkiarvo\\
 ts & havainnon aikaleima & 21:38:20.998+00\\
 asset\_tag\_mac & lähettimen MAC-osoite & 5c:02:72:67:f7:4c\\
 locator\_mac & vastaanottimen MAC-osoite & b8:27:eb:66:0d:2a\\
+locator\_lat & vastaanottimen sijainti (leveyspiiri) & 60.448265\\
+locator\_lon & vastaanottimen sijainti (pituuspiirit) & 22.294823\\
 bearing & suuntimakulma $\eta$ (astetta) & 34\\
 height & vastaanottimen korkeus (m) & 2.22 \\
 rssi & signaalin vahvuus (dBm) & -81\\
@@ -476,7 +487,7 @@ Muuttuja & Kuvaus & Esimerkkiarvo\\
 \hline
 foculator\_ts & aikaleima & 21:38:20+00\\
 foculator\_lat & testilaitteen sijainti (leveyspiiri) & 60.44819 \\
-foculator\_long & testilaitteen sijainti (pituuspiiri) & 22.29493 \\
+foculator\_lon & testilaitteen sijainti (pituuspiiri) & 22.29493 \\
 \hline
 \end{tabular}
 \caption{Testimuuttujat}
