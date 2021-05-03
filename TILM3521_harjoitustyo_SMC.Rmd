@@ -496,7 +496,7 @@ foculator\_lon & testilaitteen sijainti (pituuspiiri) & 22.29493 \\
 
 Testimuuttujia käytetään alla SMC-paikannusalgoritmin paikannusvirheen laskemisessa. 
 
-## Malli
+## Ongelman kuvaus
 
 Paikannus kerran sekunnissa.
 
