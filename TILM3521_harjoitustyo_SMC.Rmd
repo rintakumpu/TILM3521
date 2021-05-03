@@ -417,7 +417,7 @@ Data on kuvattu tarkemmin alaluvussa 4.2. Koeympäristön pohjapiirustus on esit
 \label{fig:pohjapiirustus}
 \end{figure}
 
-Ennen datan keräämistä testilaite asennettiin kiinni robottiin (kuva \ref{robotti}), joka oli ohjelmoitu ennalta seuraamaan haluttua liikerataa vastaavia lattiamerkintöjä ennalta määrätyllä nopeudella $Xm/s$. Kyseinen liikerata on merkitty koeympäristön pohjapiirustukseen sinisellä viivalla. Data kerättiin sinä aikana, kun robotti liikkui liikeradan lähtöpisteestä (piste A) liikeradan maalipisteeseen (piste B). Robotilta kului matkaan $X$ sekuntia. 
+Ennen datan keräämistä testilaite asennettiin kiinni robottiin (kuva \ref{fig:robotti}) $1.5$ metrin korkeudelle. Robotti oli ohjelmoitu ennalta seuraamaan haluttua liikerataa vastaavia lattiamerkintöjä ennalta määrätyllä nopeudella $Xm/s$. Kyseinen liikerata on merkitty koeympäristön pohjapiirustukseen sinisellä katkoviivalla. Data kerättiin sinä aikana, kun robotti liikkui liikeradan lähtöpisteestä (piste A) liikeradan maalipisteeseen (piste B). Robotilta kului matkaan $Y$ sekuntia. 
 
 \begin{figure}[H]
 \centering
@@ -426,7 +426,7 @@ Ennen datan keräämistä testilaite asennettiin kiinni robottiin (kuva \ref{rob
 \label{fig:robotti}
 \end{figure}
 
-Data kerättiin yöaikana, jolloin toimiston käyttöaste oli minimissä. Tällä minimoitiin radiosignaalin tielle osuvien ihmisten vaikutus radiosignaaleihin.
+Data kerättiin yöaikana, jolloin toimiston käyttöaste oli minimissä. Tällä minimoitiin radiosignaalien tielle osuvien ihmisten vaikutus signaaleihin.
 
 ## Datan kuvaus
 
