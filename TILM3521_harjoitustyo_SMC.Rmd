@@ -131,7 +131,7 @@ Applications" (2010). SMC-menetelmille on lukuisia sovellutuksia esimerkiksi Bay
 
 ## Suodinongelma
 
-Stokastisten prosessien teoriassa suodinongelmaksi kutsutaan tilannetta, jossa halutaan muodostaa paras mahdollinen estimaatti jonkin järjestelmän tilan arvoille, kun ainoastaan osa tiloista voidaan havaita ja/tai havaintoihin liittyy kohinaa. Tavoitteena on siis laskea jonkin Markov-prosessin posteriorijakauma kyseisten havaintojen perusteella. Tässä tutkielmassa keskitytään erityisesti epälineaarisen ns. Markovin piilomallin posteriorijakauman Bayesilaiseen ratkaisuun. Ongelmaa havainnollistaa kaavio (1).
+Stokastisten prosessien teoriassa suodinongelmaksi kutsutaan tilannetta, jossa halutaan muodostaa paras mahdollinen estimaatti jonkin järjestelmän tilan arvoille, kun ainoastaan osa tiloista voidaan havaita ja/tai havaintoihin liittyy kohinaa. Tavoitteena on siis laskea jonkin prosessin posteriorijakauma kyseisten havaintojen perusteella. Tässä tutkielmassa keskitytään erityisesti epälineaarisen ns. Markovin piilomallin posteriorijakauman Bayesilaiseen ratkaisuun. Ongelmaa havainnollistaa kaavio (1).
 
 \begin{equation}
 \begin{tikzcd}
@@ -147,7 +147,9 @@ Ongelmassa tiedämme, miten havaitut muuttujat kytkeytyvät "piilossa oleviin" m
 &\label{malli-2} y_{k} = h(x_k)+e_k.
 \end{align}
 
-Lisäksi tiedetään prosessin alkuhetken jakauma $x_1 \sim p_{x_{1}}$, tähän liittyvän kohinprosessin jakauma $\nu_k \sim p_{\nu_{k}}$ sekä malliin $y_k$ liittyvä kohina $e_k \sim p_{e_k}$. Mallit voidaan yleisemmällä tasolla esittää myös muodossa
+Lisäksi tiedetään prosessin alkuhetken jakauma $x_1 \sim p_{x_{1}}$, tähän liittyvän kohinprosessin jakauma $\nu_k \sim p_{\nu_{k}}$ sekä malliin $y_k$ liittyvä kohina $e_k \sim p_{e_k}$. Koska SMC-algoritmit pyrkivät ratkaisemaan juurikin epälineaarisen, ei-Gaussisen suodinongelman, voivat funktiot $f(\cdot)$ ja $h(\cdot)$ olla epälineaarisia eikä kohinan tarvitse olla normaalijakautunutta.
+
+Mallit voidaan yleisemmällä tasolla esittää myös muodossa
 
 \begin{align}
 &\label{malli-3} x_{k+1} \sim p(x_{k+1}|x_k)\\
@@ -346,7 +348,11 @@ w^i_{k|k} = w^i_{k-1|k-1}p(x^i_k|x^i_{k-1}).
 
 Alla esitetään kaksi algoritmiin liittyvää konvergenssitulosta, se kuinka hyvin esitetyllä SMC-algoritmilla arvioitu posterioritiheys $\hat{p}(x_{1:k}|y_{1:k})$ approksimoi todellista tiheysfunktiota $p(x_{1:k}|y_{1:k})$ sekä mikä on approksimaation keskineliövirhe. Tulokset noudattavat Crisanin ja Doucet'n artikkeleita "Convergence of Sequential Monte Carlo Methods" (2000) ja "A Survey of Convergence Results on Particle Filtering Methods for Practitioners" (2002).
 
-*Konvergenssitulos 1*: Kun $N \rightarrow \infty$ algoritmille pätee $\forall k$ tulos $\hat{p}(x_{1:k}|y_{1:k}) \xrightarrow{a.s.} p(x_{1:k}|y_{1:k})$.
+*Konvergenssitulos 1*: Kun $N \rightarrow \infty$ algoritmille pätee $\forall k$ tulos (\ref{jakaumakonvergenssi}).
+
+\begin{align}\label{jakaumakonvergenssi}
+\hat{p}(x_{1:k}|y_{1:k}) \xrightarrow{a.s.} p(x_{1:k}|y_{1:k}).
+\end{align}
 
 *Konvergenssitulos 2*: Keskineliövirheelle pätee asymptoottinen konvergenssi (\ref{MSE-konvergenssi}).
 
@@ -376,7 +382,7 @@ yllä esitetyn sijaan. Tällöin jokaisessa aikapäivitysaskeleessa lasketaan pa
 
 Algoritmin perusmuodon aikakompleksisuus on $\mathcal{O}(N)$. Uudelleenotantamenetelmän tai ehdotusjakauman valinta ei suoraan vaikuta aikakompleksisuuteen. Sen sijaan marginalisointi edellä esitetyllä tärkeytyspainolla lisää algoritmin aikakompleksisuutta $\mathcal{O}(N)\rightarrow\mathcal{O}(N^2)$, koska jokaisen partikkelin kohdalla painot lasketaan jokaisen tila-aika-avaruuspolun yli. On selvää, että erityisesti isoilla otoskoon $N$ arvoilla ei yllä esitetty marginalisointi enää ole mielekästä. 
 
-Tällaisia tilanteita varten SMC-algoritmista on olemassa $\mathcal{O}(N\text{log}(N))$ -versioita, jotka perustuvat N:n kappaleen oppimiseen (N-body learning). Näiden algoritmien käsittely jää tämän tutkielman ulkopuolelle, mutta katsaus algoritmeista on esitetty esimerkiksi Klaas &al. artikkelissa "Toward Practical $N^2$ Monte Carlo: the Marginal Particle Filter" (2012). 
+Tällaisia tilanteita varten SMC-algoritmista on olemassa $\mathcal{O}(N\text{log}(N))$ -versioita, jotka perustuvat N:n kappaleen oppimiseen (N-body learning). Näiden algoritmien käsittely jää tämän tutkielman ulkopuolelle, mutta katsauksen algoritmeista ovat esittäneet esimerkiksi Klaas &al. artikkelissa "Toward Practical $N^2$ Monte Carlo: the Marginal Particle Filter" (2012). Tutkielman kahdessa ulottuuvuudessa tapahtuvan paikannusesimerkin tapauksessa $\mathcal{O}(N^2)$-aikakompleksisuus ei ole ongelma.
 
 Lisäksi algoritmin aikakompleksisuuteen vaikuttavat seuraavat seikat. T. SUORITUSKYKY. BATCH VS ONLINE. Kun halutaan on-line-estimointia, siinä missä off-line-estimointiin.
 
@@ -388,7 +394,9 @@ Esimerkissä käyteteään SMC-algoritmia Bluetooth-paikannussovelluksessa paika
 
 ## Koeasetelma
 
-Paikaunnusesimerkissä lähettimenä toimi 25 Bluetooth-paikannustagista koostuva Walkbase Foculator -testilaite (kuva \ref{fig:foculator}), vastaanottimena toimistoympäristöön asennetut seitsemän Walkbase XR-2 -vastaanotinta (kuva \ref{fig:xr2}). Jokainen vastaanotin sisältää kahdeksan antennia, joiden vastaanottamien lähetinsignaalien perusteella vastaanottimet laskevat signaalin tulokulman suhteessa vastaanottimeen. Tarkka tulokulmien laskemiseen käytetty algoritmi on paikantimen antennit toimittaneen Silicon Laboratories, Inc. -yrityksen liikesalaisuus, mutta ***perusperiaate on. AoA relies on a single-antenna transmit beacon with continuous tone extension appended to a Bluetooth packet transmission and a locator receiver device to measure the arrival angle of the signal using an array of antennas. Each antenna in the array sees phase differences due to different line of sight distances to the beacon device. The antennas in the array are switched during continuous tone extension, resulting in IQ samples with phase information for each antenna. This IQ-data is fed to an angle estimator algorithm. In this AoA use case, the receiving device tracks arrival angles for individual transmit beacon objects.
+Paikaunnusesimerkissä lähettimenä toimi 25 Bluetooth-paikannustagista koostuva Walkbase Foculator -testilaite (kuva \ref{fig:foculator}), vastaanottimena toimistoympäristöön asennetut seitsemän Walkbase XR-2 -vastaanotinta (kuva \ref{fig:xr2}). Jokainen vastaanotin sisältää kahdeksan antennia, joiden vastaanottamien lähetinsignaalien perusteella vastaanottimet laskevat signaalin tulokulman suhteessa vastaanottimeen. Tarkka tulokulmien laskemiseen käytetty algoritmi on paikantimen antennit toimittaneen Silicon Laboratories, Inc. -yrityksen liikesalaisuus, mutta ***perusperiaate on. 
+
+AoA relies on a single-antenna transmit beacon with continuous tone extension appended to a Bluetooth packet transmission and a locator receiver device to measure the arrival angle of the signal using an array of antennas. Each antenna in the array sees phase differences due to different line of sight distances to the beacon device. The antennas in the array are switched during continuous tone extension, resulting in IQ samples with phase information for each antenna. This IQ-data is fed to an angle estimator algorithm. In this AoA use case, the receiving device tracks arrival angles for individual transmit beacon objects.
 
 Esteettömässä ympäristössä XXX kulman virhe on hyvin pieni ja paikannusongelma voidaan ratkaista suoraan jollakin triangulaatio-algoritmilla. Eräänä XXX ToTal-algoritmia. Tässäkin tilanteessa voi paikannusta parantaa suodattimen käytöllä, mutta jo triangulaatioä-algoritmin perusversio tuottaa halutun tarkkuuden. Toimistoympäristö on kuitenkin haastava, sillä erityisesti näyttöruudut sekä heijastavat että estävät radiosignaaleja. Silicon Labs lupaa omalle AoA-järjestelmälleen vastaavassa toimisympäristössä (seitsemällä paikantimella) kulmavirheen välillä $\pm 3.7-5.7$. Tämä ei kuitenkaan riitä johdonmukaisesti haluttuun alle metrin paikannustarkkuuteen, joten AoA-paikannus toimistoympäristössä tarjoaa hyvän motivaation SMC-menetelmien käyttämiseen.
 
@@ -417,7 +425,7 @@ Data on kuvattu tarkemmin alaluvussa 4.2. Koeympäristön pohjapiirustus on esit
 \label{fig:pohjapiirustus}
 \end{figure}
 
-Ennen datan keräämistä testilaite asennettiin kiinni robottiin (kuva \ref{fig:robotti}) $1.5$ metrin korkeudelle. Robotti oli ohjelmoitu ennalta seuraamaan haluttua liikerataa vastaavia lattiamerkintöjä ennalta määrätyllä nopeudella $Xm/s$. Kyseinen liikerata on merkitty koeympäristön pohjapiirustukseen sinisellä katkoviivalla. Data kerättiin sinä aikana, kun robotti liikkui liikeradan lähtöpisteestä (piste A) liikeradan maalipisteeseen (piste B). Robotilta kului matkaan $Y$ sekuntia. 
+Ennen datan keräämistä testilaite asennettiin kiinni robottiin (kuva \ref{fig:robotti}) $1.5$ metrin korkeudelle. Robotti oli ohjelmoitu ennalta seuraamaan haluttua liikerataa vastaavia lattiamerkintöjä ennalta määrätyllä nopeudella $Xm/s$. Kyseinen liikerata on merkitty koeympäristön pohjapiirustukseen sinisellä katkoviivalla. Data kerättiin sinä aikana, kun robotti liikkui liikeradan lähtöpisteestä (piste A) liikeradan maalipisteeseen (piste B). Robotilta kului matkaan $Y$ sekuntia. Sekä korkeus että nopeus valittiin niin, että ne ap XXX TÄGILLÄ MERKITYN ostoskärryjen liikkumista kauppaympäristössä. HUOMIO: Testaaminen vaikeammassa ympäristössä.
 
 \begin{figure}[H]
 \centering
@@ -498,24 +506,39 @@ Testimuuttujia käytetään alla SMC-paikannusalgoritmin paikannusvirheen laskem
 
 ## Ongelman kuvaus
 
-Paikannus kerran sekunnissa.
+Tarkoituksena on estimoida testilaitteen/robotin sijainti sekunnin tarkkuudella. Merkitään estimoitavaa tilasarjaa $x_{1:k}=\{x_1,\ldots,x_k\}$. Lisäksi merkitään $x_o$ testilaitteen lähtösijaintia. Jokainen tilasarjan havainto koostuu sekä pituus- että leveyskoordinaateista. Määritellään tilalle robotin kulkua kuvaava Markov-malli (\ref{tilamalli}):
+
+\begin{align}\label{tilamalli}
+x_{k+1}=f(x_k, \nu_k)=x_k+D_k \begin{bmatrix} \cos\psi_k \\ \sin\psi_k \end{bmatrix}+\nu_k
+\end{align}
+
+missä $D_k$ on testilaitteen/robotin ajanhetkenä $k$ kulkema matka ja $\psi_k$ robotin atsimuutti/suuntimakulma kyseisenä ajanhetkenä. $\nu_k$ on kohinaa, NORMAALIOLETUS. Vastaavasti $y_{1:k}=\{y_1,\ldots,y_k\}$ kuvaa paikantimien ja lähettimien välillä laskettuja MUUTTUJAT.
+
+\begin{align}\label{havaintomalli}
+y_k=h(x_k)+e_k=MULTIANGULAATIOMALLI
+\end{align}
+
+MALLIN VALINTA.
 
 ## Algoritmi
+
+Toteutetaan R-kielellä. Koodi liite 1.
 
 ## Tulokset
 
 # Lopuksi
 
-Tässä tutkielmassa on esitetty pääpiirteittäin SMC-menetelmien teoria sekä XXX algoritmeja. 
+Tässä tutkielmassa on esitetty pääpiirteittäin SMC-menetelmien teoria Bayesilaisessa/tilastotieteellisessä viitekehyksessä. Lisäksi tutkielmassa on käyty läpi kaksi versiota hiukassuodin algoritmista, jatkuvaa uudelleenotantaa hyödyntävä SIS-algoritmi sekä uudelleenotantaa efektiivisen otoskoon perusteella hyödyntävä SIR-algoritmi. Tutkielmassa on myös käyty lävitse joitain algoritmien parametrien valintaan, suorituskykyyn sekä konvergenssiin liittyviä tuloksia-
 
-Tutkielmassa on lisäksi tarkasteltu miten eri valinnat vaikuttavat algoritmin suorituskykyyn yksinkertaisen mutta XXX esimerkin avulla. Ei oteta kantaa esimerkiksi JATKOKYSYMYKSIÄ mahdollisuus laajentaa.
+Tutkielmassa on lisäksi tarkasteltu miten eri valinnat vaikuttavat algoritmin suorituskykyyn yksinkertaisen mutta kattavan ja todelliseen ongelmaan sekä dataan perustuvan paikannusesimerkin avulla. Jatkossa tutkielmaa olisi mahdollista laajentaa esimerkiksi JATKOKYSYMYKSIÄ.
 
 # Lähteet    
 
 - Chen & Liu (1998): **Sequential Monte Carlo Methods for Dynamic Systems**. [http://stat.rutgers.edu/home/rongchen/publications/98JASA_SMC.pdf](http://stat.rutgers.edu/home/rongchen/publications/98JASA_SMC.pdf)
 - Crisan & Doucet (2000): **Convergence of Sequential Monte Carlo Methods**. [http://www.stats.ox.ac.uk/~doucet/crisain_doucet_convergenceofSMC2000.pdf](http://www.stats.ox.ac.uk/~doucet/crisain_doucet_convergenceofSMC2000.pdf)
-- Crisan & Doucet (2002): **A Survey of Convergence Results on Particle Filtering Methods for Practitioners**. [https://www.researchgate.net/publication/3318241_A_Survey_of_Convergence_Results_on_Particle_Filtering_Methods_for_Practitioners](https://www.researchgate.net/publication/3318241_A_Survey_of_Convergence_Results_on_Particle_Filtering_Methods_for_Practitioners)
+- Crisan & Doucet (2002): **A Survey of Convergence Results on Particle Filtering Methods for Practitioners**. [https://www.researchgate.net/publication/3318241_A_Survey_of_Convergence_Results_on_Particle_Filtering_Methods_for_Practitioners](https://www.researchgate.net/publication/3318241_A_Survey_of_Convergence_Results_on_Particle_Filtering_Methods_for_Practitioners).
 - Dahlin & Schön (2019): **Getting Started with Particle Metropolis-Hastings for Inference in Nonlinear Dynamical Models**. [https://arxiv.org/pdf/1511.01707.pdf](https://arxiv.org/pdf/1511.01707.pdf).
+- Davidson, Collin & Takala (2010): **Application of Particle Filters for Indoor Positioning Using Floor Plans**. [http://www.tkt.cs.tut.fi/research/nappo_files/Davidson_UPINLBS2010.pdf](http://www.tkt.cs.tut.fi/research/nappo_files/Davidson_UPINLBS2010.pdf).
 - Munoz, Bouchereau Lara, Vargas & Enriquez-Caldera (2009): **Position Location Techniques and Applications**. Elsevier.
 - Del Moral (1996): **Nonlinear Filtering: Interacting Particle Resolution**. [https://people.bordeaux.inria.fr/pierre.delmoral/delmoral96nonlinear.pdf](https://people.bordeaux.inria.fr/pierre.delmoral/delmoral96nonlinear.pdf).
 - Gordon, Salmond & Smith (1993): **Novel approach to nonlinear/non-Gaussian Bayesian state estimation**. [http://www.irisa.fr/aspi/legland/ref/gordon93a.pdf](http://www.irisa.fr/aspi/legland/ref/gordon93a.pdf).
@@ -526,3 +549,5 @@ Applications**. [https://ieeexplore.ieee.org/document/5546308](https://ieeexplor
 - Petris, Petrone & Campagnoli (2009): **Dynamic Linear Models with R**. Springer.
 - Särkkä (2013): **Bayesian Filtering and Smoothing.** Cambridge University Press.
 [https://users.aalto.fi/~ssarkka/pub/cup_book_online_20131111.pdf](https://users.aalto.fi/~ssarkka/pub/cup_book_online_20131111.pdf).
+
+# Liite 1: SMC-paikannusalgoritmin R-koodi
