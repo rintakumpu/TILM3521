@@ -149,14 +149,14 @@ Ongelmassa tiedämme, miten havaitut muuttujat kytkeytyvät "piilossa oleviin" m
 
 Lisäksi tiedetään prosessin alkuhetken jakauma $x_1 \sim p_{x_{1}}$, tähän liittyvän kohinprosessin jakauma $\nu_k \sim p_{\nu_{k}}$ sekä malliin $y_k$ liittyvä kohina $e_k \sim p_{e_k}$. Koska SMC-algoritmit pyrkivät ratkaisemaan juurikin epälineaarisen, ei-Gaussisen suodinongelman, voivat funktiot $f(\cdot)$ ja $h(\cdot)$ olla epälineaarisia eikä kohinan tarvitse olla normaalijakautunutta.
 
-Mallit voidaan yleisemmällä tasolla esittää myös jakaumamuodossa
+Mallit voidaan esittää myös yleisemmässä jakaumamuodossa
 
 \begin{align}
-&\label{malli-3} x_{k+1} \sim p(x_{k+1}|x_k)\\
-&\label{malli-4} y_{k} \sim p(y_k|x_k)
+&\label{malli-3} x_{k+1} \sim p(x_{k+1}|x_k),\\
+&\label{malli-4} y_{k} \sim p(y_k|x_k).
 \end{align}
 
-MISSÄ Tutkielman teoriaosassa käytetään ensisijaisesti yhtälöiden (\ref{malli-3}) ja  (\ref{malli-4}) muotoilua. Empiirisessä osassa palataan yhtälöiden (\ref{malli-1}) ja (\ref{malli-2}) muotoiluun. 
+Tutkielman teoriaosassa käytetään ensisijaisesti yhtälöiden (\ref{malli-3}) ja  (\ref{malli-4}) muotoilua. Empiirisessä osassa palataan yhtälöiden (\ref{malli-1}) ja (\ref{malli-2}) muotoiluun. 
 
 Näin määritettyjen mallien avulla SMC-menetelmät estimoivat sekventiaalisesti tilojen $X_k$ arvot minä hyvänsä ajan hetkellä $k$, kun ainoastaan prosessi $Y_1, \ldots, Y_k$ tunnetaan. Estimaatit saadaan posteriorijakaumasta $p(x_k | y_1,y_2,\ldots, y_k)$, jonka approksimaatio muodostetaan Bayesilaisittain  havaintojen pohjalta. Kuten mainittua, ei SMC-perheen algoritmeja käytettäessä mallin $y_k=h(x_k)+e_k$ tarvitse olla lineaarinen eikä kohinaprosessien noudataa normaalijakaumaa. SMC-menetelmissä stokastisen prosessin posteriorijakauman esittämiseen käytettyjä otoksia kutsutaan myös partikkeleiksi. Suodinongelmaa lähellä on myös ns. tasoitusongelma (smoothing problem), jossa ollaan kiinnostuneita prosessin $x_k$ posteriorijakaumasta $p(x_k|y_k)$ jokaisena ajanhetkenä $1,\ldots,k$ ei ainoastaan haluttuna ajanhetkenä $k$. Tämä tutkielma keskittyy yksin suodinongelman ratkaisemiseen, mutta SMC-algoritmin marginalisointia koskevassa luvussa viitataan myös tasoitusongelman ratkaisuun.
 
@@ -175,25 +175,25 @@ Y_t = \int_1^t(H_sX_s+h_s)ds+W_t
 
 jossa $H_s$ ob. Näin esitetty suodinongelma voidaan ratkaista suljetussa muodossa. Edelläkävijöitä olivat BBUCY ja KALMAN. Jälkimmäisen mukaan on nimetty Kalman-suodin.
 
-Epälineaariselle ei-Gaussilaiselle mallille ...Muita vaihtoehtoja ovat EKF, UKF, QKF. It should b e stressed that both EKF and UKF approximate the model and propagate Gaussian distributions representitive of the post erior while the PMF uses the original model and approxi mates the posterior over a grid. The particle filt er (PF) also provides a numerical approximati on to the nonlinear filt eri ng prob lem similar to the PMF but uses an ad aptive stochastic grid that aut omatically select s relevant grid points i n the st ate space, and in contrast to the PMF, the st and ard PF has linear complexity i n the number o f grid points. The first traces of the PF date b ack to the 1950s [11 , 12] , and the control community made some attempts in the 1970s [ 13 , 14]. However, the PF era st arted with the semi nal paper [ 15] , and the i ndependent development s in [ 16 , 17]. Here, an important res ampli ng step was i ntroduced. The ti mi ng for proposing a general solution to the nonlinear filteri ng prob lem was perfect in that the computer development enabled the use of computationally complex algorithms in quite realistic prob lems. Si nce the paper [ 15] the research has steadily i ntensified; see the article collection [ 18] , the surveys [ 19-22] , and the monograph [23]. Fig. I illustrat es how the number of papers i ncreases exponenti ally each y ear, and the s ame appears to be true for applied papers. The PFs may be a serious alternative for real-ti me applications classically approached by the (E)KF. The more nonlinear model, or the more non-Gaussian noise, the more potential PFs have, especi ally in applications where computational power is rather cheap, and the s ampling rate i s moderate
+Epälineaariselle ei-Gaussilaiselle mallille ...Muita vaihtoehtoja ovat EKF, UKF, QKF. Laajennetun Kalman-suotimen (extended Kalman filter) kehittivät  
+
+It should b e stressed that both EKF and UKF approximate the model and propagate Gaussian distributions representitive of the post erior while the PMF uses the original model and approxi mates the posterior over a grid. The particle filt er (PF) also provides a numerical approximati on to the nonlinear filt eri ng prob lem similar to the PMF but uses an ad aptive stochastic grid that aut omatically select s relevant grid points i n the st ate space, and in contrast to the PMF, the st and ard PF has linear complexity i n the number o f grid points. The first traces of the PF date b ack to the 1950s [11 , 12] , and the control community made some attempts in the 1970s [ 13 , 14]. However, the PF era st arted with the semi nal paper [ 15] , and the i ndependent development s in [ 16 , 17]. Here, an important res ampli ng step was i ntroduced. The ti mi ng for proposing a general solution to the nonlinear filteri ng prob lem was perfect in that the computer development enabled the use of computationally complex algorithms in quite realistic prob lems. Si nce the paper [ 15] the research has steadily i ntensified; see the article collection [ 18] , the surveys [ 19-22] , and the monograph [23]. Fig. I illustrat es how the number of papers i ncreases exponenti ally each y ear, and the s ame appears to be true for applied papers. The PFs may be a serious alternative for real-ti me applications classically approached by the (E)KF. The more nonlinear model, or the more non-Gaussian noise, the more potential PFs have, especi ally in applications where computational power is rather cheap, and the s ampling rate i s moderate
 
 Monte Carlo -ratkaisuja (esim. PRINCETON) Ensimmäisen epälineaarisen suodinongelman Bayesilaisen, Monte Carlo -estimointiin perustuvan ratkaisun esittivät Gordon, Salmond ja Smith artikkelissaan "Novel approach to nonlinear/non-Gaussian Bayesian state estimation" (1993). Gordonin, Salmondin ja Smithin ratkaisu eroaa notaatioltaan hieman tässä tutkielmassa esitetystä, mutta on olennaisesti sama. Suurin ero tämän tutkielman SMC-algoritmin sekä alkuperäisen SMC-algoritmin välillä on XXX MITEN XXX. Artikkelissa ratkaisu kulki nimellä "bootstrap filter", saapasremmisuodin. MIKSI Termiä hiukkassuodin käytti ensimmäisen kerran Del Moral artikkelissa "Nonlinear Filtering: Interacting Particle Resolution" (1996), SMC-menetelmät termiä Liu ja Chen artikkelissa "Sequential Monte Carlo Methods for Dynamic Systems" (1998). Tässä tutkielmassa pyritään korostamaan suotimien yhteyttä Monte Carlo -algoritmeihin ja käytetään siksi termiä SMC-menetelmät. Poikkeuksen tähän tekee varsinainen esitetty algoritmi, jota kutsutaan yleisesti hiukkassuodin-algoritmiksi.
 
 # Bayesilainen suodin
 
-Suodinongelmassa ollaan kiinnostuttu tilavektorin posteriorijakauman $p(x_k|y_{1:k})$ estimoinnista. Koska epälineaarisessa tapauksessa ei jakaumaa voida laskea analyyttisesti, pitää estimoinnissa käyttää numeerisia menetelmiä. Tässä luvussa käydään läpi epälineaarisen hiukassuotimen yleinen rekursiivinen, Bayesilainen posteriorijakauman laskenta, jonka numeerinen toteutus esitetään luvun 3 hiukassuodinalgoritmissa. Tällaista suodinongelman ratkaisua kutsutaan myös Bayesilaiseksi suotimeksi. Esitys noudattaa Fredrik Gustafssonin artikkelia "Particle Filter Theory and
-Practice with Positioning
-Applications" (2010). 
+Suodinongelmassa ollaan kiinnostuttu tilavektorin posteriorijakauman $p(x_k|y_{1:k})$ estimoinnista. Tässä luvussa käydään läpi epälineaarisen hiukassuotimen yleinen rekursiivinen, Bayesilainen posteriorijakauman laskenta. Tällaista suodinongelman ratkaisua kutsutaan myös Bayesilaiseksi suotimeksi. Koska rekursiota ei voida laskea analyyttisesti, pitää estimoinnissa käyttää numeerisia menetelmiä. SMC-menetelmissä tämä tarkoittaa jakauman sekventiaalista Monte Carlo -approksimointia, jonka toteutus esitetään luvun 3 hiukassuodinalgoritmissa.Esitys noudattaa Fredrik Gustafssonin artikkelia "Particle Filter Theory and Practice with Positioning Applications" (2010). 
 
 Bayesilainen ratkaisu tilavektorin posteriorijakauman estimaatille $\hat{p}(x_k|y_{1:k})$ saadaan seuraavalla rekursiolla (käydään läpi jokaiselle ajanhetkelle $k=1,\ldots,t$). Lasketaan ensin
 
-\begin{align}
+\begin{align}\label{bayes-paivitys}
 p(x_k|y_{1:k}) = \frac{p(y_k|x_k)p(x_k|y_{1:k-1})}{p(y_k|y_{1:k-1})},
 \end{align}
 
 joka saadaan suoraan Bayesin kaavasta $P(A|B)=P(B|A)P(A)/P(B)$. Normalisointivakio lasketaan integraalina 
 
-\begin{align}
+\begin{align}\label{bayes-normalisointi}
 p(y_k|y_{1:k-1})=\int_{\mathbb{R}^{n_x}}p(y_k|x_k)p(x_k|y_{1:k-1})\mathop{dx_k},
 \end{align}
 
@@ -201,7 +201,7 @@ joka saadaan kokonaistodennäköisyyskaavasta $P(A)=\mathbb{E}[P(A|X)]=\int_{-\i
 
 Lopuksi lasketaan päivitysaskel ajalle, joka saadaan edelleen kokonaistodennäköisyydellä
 
-\begin{align}
+\begin{align}\label{bayes-aikapaivitys}
 p(x_{k+1}|y_{1:k})=\int_{\mathbb{R}^{n_x}}p(x_{k+1}|x_k)p(x_k|y_{1:k})\mathop{dx_k}.
 \end{align}
 
@@ -219,7 +219,7 @@ Algoritmin ensimmäisessä vaiheessa päivitetään painot yhtälön \ref{painop
 \hat{p}(x_{1:k}|y_{1:k})=\sum_{i=1}^{N}w_{k|k}^i \delta(x_{1:k}-x_{1:k}^i)
 \end{align}
 
-Normalisointipaino $c_k$ lasketaan puolestaan yhtälöstä (\ref{normalisointi}). VASTAAVUUS BAYES-suotimeen. 
+Tämä vastaa yllä esitetyn Bayes-suotimen päivitysvaihetta (\ref{bayes-paivitys}). Normalisointipaino $c_k$ lasketaan puolestaan yhtälöstä (\ref{normalisointi}), mikä vastaa Bayes-suotimen normalisointivakion laskemista (\ref{bayes-normalisointi}).
 
 \begin{align}\label{normalisointi}
 c_k=\sum_{i=1}^{N}w_{k|{k-1}}^ip(y_k|x_k^i).
@@ -237,13 +237,15 @@ Seuraavassa vaiheessa suoritetaan valinnainen uudelleenotanta. Kun uudelleenotan
 Lopuksi päivitetään aika (jos $k < t$) ja luodaan uudet ennusteet partikkeleille ehdotusjakaumasta (\ref{ehdotusjakauma})
 
 \begin{align}\label{ehdotusjakauma}
-x_{k+1}^i\sim q(x_{k+1}|x_k^i,y_{k+1}
+x_{k+1}^i\sim q(x_{k+1}|x_k^i,y_{k+1})
 \end{align}
 
 ja päivitetään partikkelien painot tärkeytysotannalla (\ref{tarkeytys}), sen mukaan kuinka todennäköisiä partikkelien ennusteet ovat 
 
 \begin{align}\label{tarkeytys} w_{k+1|k}^i=w_{k|k}^i\frac{p(x_{k+1}^i|x_k^i)}{q(x_{k+1}^i|x_k^i,y_{k+1})}.
 \end{align}
+
+Vaiheet \ref{ehdotusjakauma} ja \ref{tarkeytys} vastaavat Bayes-suotimen aikapäivitystä (\ref{bayes-aikapaivitys}). 
 
 Alla käsitellään algoritmiin liittyvän uudelleenotantamenetelmän, partikkelien määrän / otoskoon ja ehdotusjakauman valinta. Lopuksi esiteetään algoritmin konvergenssia, marginaalijakaumaa sekä aikakompleksisuutta koskevia tuloksia.
 
@@ -539,7 +541,11 @@ Algoritmin toteutuksessa on otettu huomioon seuraavat suorituskykyyn liittyvät 
 
 ## Tulokset
 
-Koe toistettiin $K$ kertaa. Ensimmäisessä vaiheessa $N=1000$ JATKA. Vertailuarvoina käytettiin puhtaaseen triangulaatioon (TOTAL) perustuvaa XXX. Paikannusten keskivirheet on esitetty taulukossa (\ref{tab:paikannusvirheet}). Parhaimman suorituskyvyn PAIKANNUSMIELESSÄ algoritmi valittiin lisätarkasteluun SMC-algoritmien parametrinvalintaa KOSKIEN.
+Koe toistettiin $6$ kertaa. Ensimmäisessä vaiheessa testilaite pidettiin paikallaan ja kerättyyn dataan sovellettiin kolmea eri algoritmia. Ensin paikannus suoritettiin pelkän ToTal-algoritmin avulla. Tätä puhtaaseen triangulaatioon perustuvaa paikannusta käytetään vertailuarvona 
+
+SIS/SIR-algoritmien kohdalla partikkelien lukumääräksi valittiin $N=1000$. SIR-algoritmin kohdalla käytettiin NEFF.
+
+Vertailuarvoina käytettiin puhtaaseen triangulaatioon (TOTAL) perustuvaa XXX. Paikannusten keskivirheet on esitetty taulukossa (\ref{tab:paikannusvirheet}). Parhaimman suorituskyvyn PAIKANNUSMIELESSÄ algoritmi valittiin lisätarkasteluun SMC-algoritmien parametrinvalintaa KOSKIEN.
 
 \def\arraystretch{1.25} 
 \begin{table}[H]
