@@ -162,14 +162,22 @@ Näin määritettyjen mallien avulla SMC-menetelmät estimoivat sekventiaalisest
 
 ## Historiaa
 
-Lineaarisen stokastisen suodinongelman ratkaisu on tunnettu ... Alaluku noudattaa suodatinongelman historian kuvauksessa Crisanin artikkelia "The stochastic filtering problem: a brief historical account" (2014) ja SMC-menetelmien kuvauksessa Cappé &al artikkelia "An overview of existing methods and recent
-advances in sequential Monte Carlo" (2007). SMC-menetelmien osalta sivuutetaan siis viimeisen kymmenen vuoden kehitys. Tämä on linjassa tutkielman varsinaisen teoriaosuuden kanssa. 
+Tämä alaluku esittää pääpiirteittään suodinongelmalle esitettyjen ratkaisujen historian. Lineaarisen suodinongelman osalta alaluku noudattaa Crisanin artikkelia "The stochastic filtering problem: a brief historical account" (2014) ja epälineaaristen/linearisoitujen ratkaisujen ostalta Cappé &al artikkelia "An overview of existing methods and recent
+advances in sequential Monte Carlo" (2007). SMC-menetelmien osalta sivuutetaan siis viimeisen viidentoista vuoden kehitys. Tämä on linjassa tutkielman varsinaisen teoriaosuuden kanssa. 
+
+Lineaarisen stokastisen suodinongelman ratkaisu on tunnettu 50-luvulta lähtien ja ollut laajamittaisessa käytössä 60-luvulta. 
+
+Näissä ongelma voidaan esittää muodossa
+
+\begin{align}
+Y_t = \int_1^t(H_sX_s+h_s)ds+W_t
+\end{align}
+
+jossa $H_s$ ob. Näin esitetty suodinongelma voidaan ratkaista suljetussa muodossa. Edelläkävijöitä olivat BBUCY ja KALMAN. Jälkimmäisen mukaan on nimetty Kalman-suodin.
 
 Epälineaariselle ei-Gaussilaiselle mallille ...Muita vaihtoehtoja ovat EKF, UKF, QKF. It should b e stressed that both EKF and UKF approximate the model and propagate Gaussian distributions representitive of the post erior while the PMF uses the original model and approxi mates the posterior over a grid. The particle filt er (PF) also provides a numerical approximati on to the nonlinear filt eri ng prob lem similar to the PMF but uses an ad aptive stochastic grid that aut omatically select s relevant grid points i n the st ate space, and in contrast to the PMF, the st and ard PF has linear complexity i n the number o f grid points. The first traces of the PF date b ack to the 1950s [11 , 12] , and the control community made some attempts in the 1970s [ 13 , 14]. However, the PF era st arted with the semi nal paper [ 15] , and the i ndependent development s in [ 16 , 17]. Here, an important res ampli ng step was i ntroduced. The ti mi ng for proposing a general solution to the nonlinear filteri ng prob lem was perfect in that the computer development enabled the use of computationally complex algorithms in quite realistic prob lems. Si nce the paper [ 15] the research has steadily i ntensified; see the article collection [ 18] , the surveys [ 19-22] , and the monograph [23]. Fig. I illustrat es how the number of papers i ncreases exponenti ally each y ear, and the s ame appears to be true for applied papers. The PFs may be a serious alternative for real-ti me applications classically approached by the (E)KF. The more nonlinear model, or the more non-Gaussian noise, the more potential PFs have, especi ally in applications where computational power is rather cheap, and the s ampling rate i s moderate
 
-Monte Carlo -ratkaisuja (esim. Princeton)
-
-Ensimmäisen epälineaarisen suodinongelman Bayesilaisen, Monte Carlo -estimointiin perustuvan ratkaisun esittivät Gordon, Salmond ja Smith artikkelissaan "Novel approach to nonlinear/non-Gaussian Bayesian state estimation" (1993). Gordonin, Salmondin ja Smithin ratkaisu eroaa notaatioltaan hieman tässä tutkielmassa esitetystä, mutta on olennaisesti sama. Suurin ero tämän tutkielman SMC-algoritmin sekä alkuperäisen SMC-algoritmin välillä on XXX MITEN XXX. Artikkelissa ratkaisu kulki nimellä "bootstrap filter", saapasremmisuodin. MIKSI Termiä hiukkassuodin käytti ensimmäisen kerran Del Moral artikkelissa "Nonlinear Filtering: Interacting Particle Resolution" (1996), SMC-menetelmät termiä Liu ja Chen artikkelissa "Sequential Monte Carlo Methods for Dynamic Systems" (1998). Tässä tutkielmassa pyritään korostamaan suotimien yhteyttä Monte Carlo -algoritmeihin ja käytetään siksi termiä SMC-menetelmät. Poikkeuksen tähän tekee varsinainen esitetty algoritmi, jota kutsutaan tutkielmassa hiukkassuodin-algoritmiksi.
+Monte Carlo -ratkaisuja (esim. PRINCETON) Ensimmäisen epälineaarisen suodinongelman Bayesilaisen, Monte Carlo -estimointiin perustuvan ratkaisun esittivät Gordon, Salmond ja Smith artikkelissaan "Novel approach to nonlinear/non-Gaussian Bayesian state estimation" (1993). Gordonin, Salmondin ja Smithin ratkaisu eroaa notaatioltaan hieman tässä tutkielmassa esitetystä, mutta on olennaisesti sama. Suurin ero tämän tutkielman SMC-algoritmin sekä alkuperäisen SMC-algoritmin välillä on XXX MITEN XXX. Artikkelissa ratkaisu kulki nimellä "bootstrap filter", saapasremmisuodin. MIKSI Termiä hiukkassuodin käytti ensimmäisen kerran Del Moral artikkelissa "Nonlinear Filtering: Interacting Particle Resolution" (1996), SMC-menetelmät termiä Liu ja Chen artikkelissa "Sequential Monte Carlo Methods for Dynamic Systems" (1998). Tässä tutkielmassa pyritään korostamaan suotimien yhteyttä Monte Carlo -algoritmeihin ja käytetään siksi termiä SMC-menetelmät. Poikkeuksen tähän tekee varsinainen esitetty algoritmi, jota kutsutaan yleisesti hiukkassuodin-algoritmiksi.
 
 # Bayesilainen suodin
 
