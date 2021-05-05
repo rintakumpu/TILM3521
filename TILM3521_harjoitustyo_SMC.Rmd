@@ -167,7 +167,7 @@ advances in sequential Monte Carlo" (2007). SMC-menetelmien osalta sivuutetaan s
 
 Lineaarisen stokastisen suodinongelman ratkaisu on tunnettu 50-luvulta lähtien ja ollut laajamittaisessa käytössä 60-luvulta. 
 
-Näissä ongelma voidaan esittää muodossa
+Lineaarinen suodinongelma voidaan formalisoida muodossa ... Näissä ongelma voidaan esittää muodossa
 
 \begin{align}
 Y_t = \int_1^t(H_sX_s+h_s)ds+W_t
@@ -211,7 +211,7 @@ Rekursion avulla voidaan laskea $p(x_k|y_{1:k})$ käymällä rekursio läpi $k$ 
 
 Täsäs luvussa esitetään hiukassuodin-SMC-algoritmi Bayesilaisen, epälineaarisen suodinongelman ratkaisemiseksi. Algoritmi on numeerinen toteutus luvussa 2. kuvatusta Bayesilaisesta suotimesta. Esitetty algoritmi perustuu Fredrik Gustafssonin artikkeliin "Particle Filter Theory and Practice with Positioning Applications" (2010).
 
-Algoritmi alustetaan jakaumasta $x_1^i\sim p_{x_0}$ generoiduilla $N$-kappaleella partikkeleita. Jokaiselle partikkelille annetaan alustuksessa sama paino $w_{1|0}^i=1/N$. Algoritmi suoritetaan jokaiselle partikkelille $i=1,2,\ldots,N$ jokaisella ajanhetkellä $k=1,2,\ldots,t$. Algoritmin kuvauksessa käytetään notaatiota $x_k^i$, joka tarkoittaa, että tila $x_k$ käy ajanhetkellä $k$ gridin pisteessä $x^i$. Notaatiota tarvitaan, koska SMC-algoritmin läpikäymä gridi muuttuu ajan funktiona. SYÖTE
+Algoritmi alustetaan jakaumasta $x_1^i\sim p_{x_0}$ generoiduilla $N$-kappaleella partikkeleita. Jokaiselle partikkelille annetaan alustuksessa sama paino $w_{1|0}^i=1/N$. Algoritmi suoritetaan jokaiselle partikkelille $i=1,2,\ldots,N$ jokaisella ajanhetkellä $k=1,2,\ldots,t$. Algoritmin kuvauksessa käytetään notaatiota $x_k^i$, joka tarkoittaa, että tila $x_k$ käy ajanhetkellä $k$ gridin pisteessä $x^i$. Notaatiota tarvitaan, koska SMC-algoritmin läpikäymä gridi muuttuu ajan funktiona.
 
 Algoritmin ensimmäisessä vaiheessa päivitetään painot yhtälön \ref{painopaivitys} mukaan.
 
