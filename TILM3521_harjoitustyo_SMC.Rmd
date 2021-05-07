@@ -129,16 +129,16 @@ SMC-menetelmät (Sequential Monte Carlo -mentelmät, tunnetaan tilastotieteessä
 
 ## Suodinongelma
 
-Stokastisten prosessien teoriassa suodinongelmaksi kutsutaan tilannetta, jossa halutaan muodostaa paras mahdollinen estimaatti jonkin järjestelmän tilan arvoille, kun ainoastaan osa tiloista voidaan havaita ja/tai havaintoihin liittyy kohinaa. Tavoitteena on siis laskea jonkin prosessin posteriorijakauma kyseisten havaintojen perusteella. Tässä tutkielmassa keskitytään erityisesti epälineaarisen ns. Markovin piilomallin posteriorijakauman Bayesilaiseen ratkaisuun. Ongelmaa havainnollistaa kaavio (1). MARKOV-OLETUS. We make the assumption that xt is Markovian, i.e. its conditional probability density given the past states x0:t-1 def = (x0, . . . , xt-1) depends only on xt-1 through the transition density f(xt|xt-1), and that the conditional probability density of yt given the states x0:t and the past observations y0:t-1 depends only upon xt through the conditional likelihood g(yt|xt).
+Stokastisten prosessien teoriassa suodinongelmaksi kutsutaan tilannetta, jossa halutaan muodostaa paras mahdollinen estimaatti jonkin järjestelmän tilan arvoille, kun ainoastaan osa tiloista voidaan havaita ja/tai havaintoihin liittyy kohinaa. Tavoitteena on siis laskea jonkin prosessin posteriorijakauma kyseisten havaintojen perusteella. Tässä tutkielmassa keskitytään erityisesti epälineaarisen ns. Markovin piilomallin posteriorijakauman Bayesilaiseen ratkaisuun. Ongelmaa havainnollistaa kaavio (\ref{mallikaavio}). 
 
-\begin{equation}
+\begin{equation}\label{mallikaavio}
 \begin{tikzcd}
 X_1 \arrow[d] \arrow[r] & X_2 \arrow[d] \arrow[r] & X_3 \arrow[d] \arrow[r] & \ldots & \makebox[\widthof{$ \text{havainnot}$}]{$\text{piilossa olevat tilat}$} \\
 Y_1  & Y_2  & Y_3  & \ldots & \makebox[\widthof{$ \text{havainnot}$}]{$\text{havainnot}$}
 \end{tikzcd}
 \end{equation}
 
-Ongelmassa tiedämme, miten havaitut muuttujat kytkeytyvät "piilossa oleviin" muuttujiin sekä osaamme sanoa jotain tilamuuttujien todennäköisyyksistä. Oletamme lisäksi, että piilossa olevat tilat muodostavat Markovin ketjun. Kun aika-avaruus on diskreetti ja merkitsemme piilossa olevan prosessin tilaa ajanhetkellä $k$ $x_k$ ja havaittua prosessia $y_k$, meillä on siis olemassa mallit
+Ongelmassa tiedämme, miten havaitut muuttujat kytkeytyvät "piilossa oleviin" muuttujiin sekä osaamme sanoa jotain tilamuuttujien todennäköisyyksistä. Oletamme, että piilossa oleville tiloille $X_n$ pätee Markov-ominaisuus. Toisin sanoen kutakin hetkeä seuraava tila $x_{n+1}$ riippuu menneistä tiloista $x_{1:n}$ ainoastaan tilan $x_n$ välityksellä. Oletamme myös, että havaittu tila $y_n$ riippuu tiloista $X_{n}$ ainoastaan jonkin $x_k$:n funktion kautta. Kun aika-avaruus on diskreetti ja merkitsemme piilossa olevan prosessin tilaa ajanhetkellä $k$ $x_k$ ja havaittua prosessia $y_k$, meillä on siis olemassa mallit
 
 \begin{align}
 &\label{malli-1} x_{k+1} = f(x_k, \nu_k)\\
@@ -220,7 +220,7 @@ Algoritmi alustetaan jakaumasta $x_1^i\sim p_{x_0}$ generoiduilla $N$-kappaleell
 Algoritmin ensimmäisessä vaiheessa päivitetään painot yhtälön \ref{painopaivitys} mukaan.
 
 \begin{align}\label{painopaivitys}
-\hat{p}(x_{1:k}|y_{1:k})=\sum_{i=1}^{N}w_{k|k}^i \delta(x_{1:k}-x_{1:k}^i)
+w^i_{k|k}=\frac{1}{c_k}w^i_{k|k-1}p(y_k|x^i_k).
 \end{align}
 
 Tämä vastaa yllä esitetyn Bayes-suotimen päivitysvaihetta (\ref{bayes-paivitys}). Normalisointipaino $c_k$ lasketaan puolestaan yhtälöstä (\ref{normalisointi}), mikä vastaa Bayes-suotimen normalisointivakion laskemista (\ref{bayes-normalisointi}).
