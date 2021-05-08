@@ -123,9 +123,11 @@ site_map <- site_map + theme(
 #site_map <- site_map + annotate("point", y=60.44817, x=22.29496, color="magenta", size=3)
 ```
 
+\newpage
+
 # Johdanto
 
-SMC-menetelmät (Sequential Monte Carlo -mentelmät, tunnetaan tilastotieteessä myös nimellä hiukkassuotimet) ovat joukko 90-luvulta eteenpäin kehitettyjä Monte Carlo -algoritmeja, joiden avulla voidaan ratkaista ns. suodinongelma, kun ongelma on epälineaarinen ja/tai ongelmaan liittyvä kohina ei noudata normaalijakaumaa. Tämän tutkielman tavoitteena on esittää pääpiirteittäin SMC-menetelmien teoria sekä joitakin menetelmäperheeseen kuuluvia algoritmeja. Tutkielman esitykset seuraavat erityisesti Simo Särkän kirjaa *Bayesian Filtering and Smoothing* (2013) sekä Fredrik Gustafssonin artikkelia "Particle Filter Theory and Practice with Positioning Applications" (2010). SMC-menetelmille on lukuisia sovellutuksia esimerkiksi Bayesilaisessa tilastotieteessä, fysiikassa ja robotiikassa. Tutkielman lopussa tarkastellaan hiukkassuotimen käyttöä paikannussovelluksessa.
+SMC-menetelmät (sequential Monte Carlo -mentelmät) ovat joukko 90-luvulta eteenpäin kehitettyjä Monte Carlo -algoritmeja, joiden avulla voidaan ratkaista ns. suodinongelma, kun ongelma on epälineaarinen ja/tai ongelmaan liittyvä kohina ei noudata normaalijakaumaa. Tämän tutkielman tavoitteena on esittää pääpiirteittäin SMC-menetelmien teoria sekä joitakin menetelmäperheeseen kuuluvia algoritmeja. Tutkielman esitykset seuraavat erityisesti Simo Särkän kirjaa *Bayesian Filtering and Smoothing* (2013), Fredrik Gustafssonin artikkelia "Particle Filter Theory and Practice with Positioning Applications" (2010) sekä Cappé &al artikkeliin "An overview of existing methods and recent advances in sequential Monte Carlo" (2007). SMC-menetelmille on lukuisia sovellutuksia esimerkiksi Bayesilaisessa tilastotieteessä, fysiikassa ja robotiikassa. Tutkielman lopussa tarkastellaan menetelmien käyttöä paikannussovelluksessa.
 
 ## Suodinongelma
 
@@ -138,7 +140,7 @@ Y_1  & Y_2  & Y_3  & \ldots & \makebox[\widthof{$ \text{havainnot}$}]{$\text{hav
 \end{tikzcd}
 \end{equation}
 
-Ongelmassa tiedämme, miten havaitut muuttujat kytkeytyvät "piilossa oleviin" muuttujiin sekä osaamme sanoa jotain tilamuuttujien todennäköisyyksistä. Oletamme, että piilossa oleville tiloille $X_n$ pätee Markov-ominaisuus. Toisin sanoen kutakin hetkeä seuraava tila $x_{n+1}$ riippuu menneistä tiloista $x_{1:n}$ ainoastaan tilan $x_n$ välityksellä. Oletamme myös, että havaittu tila $y_n$ riippuu tiloista $X_{n}$ ainoastaan jonkin $x_k$:n funktion kautta. Kun aika-avaruus on diskreetti ja merkitsemme piilossa olevan prosessin tilaa ajanhetkellä $k$ $x_k$ ja havaittua prosessia $y_k$, meillä on siis olemassa mallit
+Ongelmassa tiedämme, miten havaitut muuttujat $Y_k$ kytkeytyvät "piilossa oleviin" muuttujiin $X_k$ sekä osaamme sanoa jotain tilamuuttujien todennäköisyyksistä. Oletamme, että piilossa oleville tiloille $X_k$ pätee Markov-ominaisuus. Toisin sanoen kutakin hetkeä seuraava tila $x_{k+1}$ riippuu menneistä tiloista $x_{1:k}$ ainoastaan tilan $x_k$ välityksellä. Oletamme myös, että havaittu tila $y_k$ riippuu tiloista $X_{k}$ ainoastaan jonkin $x_k$:n funktion kautta. Kun aika-avaruus on diskreetti ja merkitsemme ajanhetkellä $k=1,\ldots,t$ piilossa olevan prosessin tilaa $x_k$ ja havaittua prosessia $y_k$, meillä on siis olemassa mallit
 
 \begin{align}
 &\label{malli-1} x_{k+1} = f(x_k, \nu_k)\\
@@ -156,14 +158,18 @@ Mallit voidaan esittää myös yleisemmässä jakaumamuodossa
 
 Tutkielman teoriaosassa käytetään ensisijaisesti yhtälöiden (\ref{malli-3}) ja  (\ref{malli-4}) muotoilua. Empiirisessä osassa palataan yhtälöiden (\ref{malli-1}) ja (\ref{malli-2}) muotoiluun. 
 
-Näin määritettyjen mallien avulla SMC-menetelmät estimoivat sekventiaalisesti tilojen $X_k$ arvot minä hyvänsä ajan hetkellä $k$, kun ainoastaan prosessi $Y_1, \ldots, Y_k$ tunnetaan. Estimaatit saadaan posteriorijakaumasta $p(x_k | y_1,y_2,\ldots, y_k)$, jonka approksimaatio muodostetaan Bayesilaisittain  havaintojen pohjalta. Kuten mainittua, ei SMC-perheen algoritmeja käytettäessä mallin $y_k=h(x_k)+e_k$ tarvitse olla lineaarinen eikä kohinaprosessien noudataa normaalijakaumaa. SMC-menetelmissä stokastisen prosessin posteriorijakauman esittämiseen käytettyjä otoksia kutsutaan myös partikkeleiksi. Suodinongelmaa lähellä on myös ns. tasoitusongelma (smoothing problem), jossa ollaan kiinnostuneita prosessin $x_k$ posteriorijakaumasta $p(x_k|y_k)$ jokaisena ajanhetkenä $1,\ldots,k$ ei ainoastaan haluttuna ajanhetkenä $k$. Tämä tutkielma keskittyy yksin suodinongelman ratkaisemiseen, mutta SMC-algoritmin marginalisointia koskevassa luvussa viitataan myös tasoitusongelman ratkaisuun.
+Yleisesti suodinongelman estimaatit saadaan posteriorijakaumasta $p(x_k | y_1,y_2,\ldots, y_k)$. Posteriorijakauma voidaan kuitenkin laskea suljetussa muodssa vain, jos kyseessä on lineaarinen, Gaussinen malli. Yllä määritettyjen mallien avulla SMC-menetelmät muodostavat sekventiaalisesti tilojen $X_k$ Monte Carlo -estimaatit minä hyvänsä ajan hetkellä $k$, kun ainoastaan prosessi $Y_1, \ldots, Y_k$ tunnetaan. Kuten mainittua, ei SMC-perheen algoritmeja käytettäessä mallin $y_k=h(x_k)+e_k$ tarvitse olla lineaarinen eikä kohinaprosessien noudataa normaalijakaumaa. 
+
+SMC-menetelmissä stokastisen prosessin posteriorijakauman esittämiseen käytettyjä otoksia kutsutaan myös partikkeleiksi ja joitakin SMC-algoritmeja siten hiukkassuotimiksi. Tässä tutkielmassa pyritään korostamaan suotimien yhteyttä Monte Carlo -algoritmeihin ja käytetään siksi yleisempää termiä SMC-menetelmät. Poikkeuksen tähän tekee varsinainen esitetty algoritmi, jota kutsutaan yleisesti hiukkassuodin-algoritmiksi.
+
+Suodinongelmaa lähellä on myös ns. tasoitusongelma (smoothing problem), jossa ollaan kiinnostuneita prosessin $x_k$ posteriorijakaumasta $p(x_k|y_k)$ jokaisena ajanhetkenä $1,\ldots,k$ ei ainoastaan haluttuna ajanhetkenä $k$. Tämä tutkielma keskittyy yksin suodinongelman ratkaisemiseen, mutta SMC-algoritmin marginalisointia koskevassa luvussa viitataan myös tasoitusongelman ratkaisuun.
 
 ## Historiaa
 
 Tämä alaluku esittää pääpiirteittään suodinongelmalle esitettyjen ratkaisujen historian. Lineaarisen suodinongelman osalta alaluku noudattaa Crisanin artikkelia "The stochastic filtering problem: a brief historical account" (2014) sekä Grewalin ja Andrewsin artikkelia "Applications of Kalman Filtering in Aerospace 1960 to the Present" (2010), SMC-menetelmien osalta puolestaan Cappé &al artikkelia "An overview of existing methods and recent
 advances in sequential Monte Carlo" (2007). SMC-menetelmissä sivuutetaan siis viimeisen viidentoista vuoden kehitys. Tämä on linjassa tutkielman varsinaisen teoriaosuuden kanssa. 
 
-Suodinongelma nousi esille erityisesti insinööritieteiden sekä sotateollisuuden käytännön ongelmista 2. maailmansodan aikana vaikkakin suodinongelman diskreetin ajan ratkaisut juontavat jo Andrei N. Kolmogorovin 30-luvun artikkeleihin. Jatkuvan ajan tilanteessa ensimmäinen optimaalisen, kohinan sallivan suotiman esitti matemaatikko, kybernetiikan kehittäjä Norbert Wiener. Wiener-suotimena tunnettua ratkaisuaan varten Wiener muotoili myös seuraavat kolme ominaisuutta, jotka prosessin $X$ estimaatin $\hat{X}_t$ pitää toteuttaa. 
+Suodinongelma nousi esille erityisesti insinööritieteiden sekä sotateollisuuden käytännön ongelmista 2. maailmansodan aikana, vaikkakin suodinongelman diskreetin ajan ratkaisut juontavat jo Andrei N. Kolmogorovin 30-luvun artikkeleihin. Jatkuvan ajan tilanteessa ensimmäinen optimaalisen, kohinan sallivan suotiman esitti matemaatikko, kybernetiikan kehittäjä Norbert Wiener. Wiener-suotimena tunnettua ratkaisuaan varten Wiener muotoili myös seuraavat kolme ominaisuutta, jotka prosessin $X$ estimaatin $\hat{X}_t$ pitää toteuttaa. 
 
 \begin{enumerate}
 \vspace{\baselineskip}
@@ -173,7 +179,7 @@ Suodinongelma nousi esille erityisesti insinööritieteiden sekä sotateollisuud
 \vspace{\baselineskip}
 \end{enumerate}
 
-Wienerin sovelsi ratkaisussaan stationaaristen prosessien spektriteoriaa ja tulokset julkaistiin salaisina Yhdysvaltojen asevoimien tutkimuksesta vastanneen National Defense Research Committeen (NDRC) raportissa vuonna 1942. Tutkimus tunnettiin sodan aikana lempinimellä "Keltainen vaara" sekä painopaperinsa värin että vaikeaselkoisuutensa vuoksi. Myöhemmin Wiener esitti tulokset julkisesti kirjassaan *Extrapolation, Interpolation and Smoothing of Stationary Time Series*. Wienerin alkuperäiset kolme perusperiaatetta päteveät edelleen kaikille suodinongelman ratkaisuille, myös SMC-menetelmille. 
+Wiener sovelsi ratkaisussaan stationaaristen prosessien spektriteoriaa ja tulokset julkaistiin salaisina Yhdysvaltojen asevoimien tutkimuksesta vastanneen National Defense Research Committeen (NDRC) raportissa vuonna 1942. Tutkimus tunnettiin sodan aikana lempinimellä "Keltainen vaara" sekä painopaperinsa värin että vaikeaselkoisuutensa vuoksi. Myöhemmin Wiener esitti tulokset julkisesti kirjassaan *Extrapolation, Interpolation and Smoothing of Stationary Time Series*. Wienerin alkuperäiset kolme perusperiaatetta päteveät edelleen kaikille suodinongelman ratkaisuille, myös SMC-menetelmille. 
 
 Kenties tärkein ja varmasti tunnetuin lineaariseen suodinongelman ratkaisu on Kalman-suodin. Suotimen kehittivät R.E. Kalman ja R.S. Bucy 1950- ja 60-lukujen taitteessa Yhdysvaltain kylmän sodan kilpavarustelutarpeisiin perustetussa Research Institute for Advanced Studies -tutkimuslaitoksessa (RIAS). Kalman-suodin on suodinongelman diskreetin ajan ratkaisu, kun taas Kalman-Bucy-suodin on jatkuvan ajan ratkaisu. Kohinan ollessa normaalijakautunutta on Kalman-suodin Wiener-suotimen tavoin lineaarisen suodinongelman optimaalinen ratkaisu. Wiener-suotimella ja Kalman-suotimella on kuitenkin erilaiset oletukset, minkä vuoksi erityisesti säätö- ja paikannussovelluksissa Kalman-suotimen käyttö on luontevampaa. Suotimien oletuksia ja oletusten välisiä eroja ei käsitellä tässä tutkielmassa, kuten ei käsitellä myöskään Kalman-suotimen formaalia yhteyttä SMC-menetelmiin.
 
@@ -181,13 +187,18 @@ Kalman-suodinta voidaan soveltaa myös epälineaariseen ongelmaan, kunhan funkti
 
 Kalman-suotimesta on lisäksi olemassa lukuisia muita epälineaarisiin ongelmiin soveltuvia laajennuksia, muun muassa paikkaratkaisun Kalman-suodin (position Kalman filter, PKF), hajustamaton Kalman-suodin (unscented Kalman filter, UKF) ja tilastollisesti linearisoitu Kalman-suodin (statistically linearized Kalman filter, SLF). Kuitenkin jos prosessin $X$ mallia ei tunneta tarkasti tai kohinaa ei voida olettaa normaalijakautuneeksi, ovat sekventiaaliset Monte Carlo -menetelmät Kalman-suotimen johdannaisia parempia ratkaisuja. Vaikka tila-avaruuden dimensioiden kasvaessa kasvaa myös SMC-menetelmien vaatima laskentateho, ovat nämä menetelmät aina sitä parempia mitä epälineaarisempia mallit ovat ja mitä kauempana normaalijakaumasta kohina on. Viimeisten vuosikymmenten aikana myös laskennan teho on kasvanut merkittävästi samalla kun laskennan hinta on vastaavasti romahtanut. Nämä seikat puoltavat Monte Carlo -menetelmien käyttöä entistä useammissa ongelmissa. 
 
-Joitakin suodinongelman rekursiivisia Monte Carlo -ratkaisuja löytyy 50-70-luvuilta, erityisesti säätöteoriaan piiristä. Ensimmäisen epälineaarisen suodinongelman Bayesilaisen, numeeriseen Monte Carlo -estimointiin perustuvan ratkaisun esittivät kuitenkin Gordon, Salmond ja Smith artikkelissaan "Novel approach to nonlinear/non-Gaussian Bayesian state estimation" (1993). Gordonin, Salmondin ja Smithin ratkaisu eroaa notaatioltaan hieman tässä tutkielmassa esitetystä, mutta on olennaisesti sama. Gordonin, Salmondin ja Smithin artikkelissa ratkaisu kulki nimellä "bootstrap filter", saapasremmisuodin. Suurin ero tämän tutkielman SMC-algoritmin sekä artikkelin SMC-algoritmin välillä on uudelleenotannassa, joka alkuperäisessä artikkelissa suoritetaan jokaisella algoritmin iteraatiolla. LASKENTATEHO.
+Joitakin suodinongelman rekursiivisia Monte Carlo -ratkaisuja löytyy 50-70-luvuilta, erityisesti säätöteoriaan piiristä. Olennainen oivallus oli tärkeytysotannan käyttö halutun jakaumaestimaatin laskennassa. Tärkeytysotantaan voidaan turvautua, kun emme pysty suoraan tekemään havaintoja jostakin jakaumasta $p$ ja teemme sen sijaan havaintoja jakaumasta $q$, joita painotamme niin, että tuloksena saadaan jakauman $p$ harhaton estimaatti. Algoritmi on kuvattu tarkemmin tutkielman luvussa 3.
 
-Termiä hiukkassuodin käytti ensimmäisen kerran Del Moral artikkelissa "Nonlinear Filtering: Interacting Particle Resolution" (1996), SMC-menetelmät termiä Liu ja Chen artikkelissa "Sequential Monte Carlo Methods for Dynamic Systems" (1998). Tässä tutkielmassa pyritään korostamaan suotimien yhteyttä Monte Carlo -algoritmeihin ja käytetään siksi termiä SMC-menetelmät. Poikkeuksen tähän tekee varsinainen esitetty algoritmi, jota kutsutaan yleisesti hiukkassuodin-algoritmiksi.
+Tärkeysotantaa käyttävä suodinongelman ratkaiseva SIS-algoritmi (sequential importance sampling) ei kuitenkaan vielä 70-luvulla löytänyt suurta käytännön suosiota. Osin tämä johtui puutteellisesta laskentatehosta, mutta algoritmi kärsi myös otosten ehtymisenä (sample impoverishment) tunnetusta ongelmasta. Monissa ongelmissa SIS-algoritmia käytettäessä suuri osa painoista päätyy vain tietyille partikkeleille, jolloin vastaavasti suuri osa partikkeleista ei enää estimoi haluttua jakaumaa. Tähän ongelmaan palataan myöhemmin tukielmassa.
+
+Merkittävän ratkaisun eehtymisongelmaan esittivät Gordon, Salmond ja Smith artikkelissaan "Novel approach to nonlinear/non-Gaussian Bayesian state estimation" (1993). Artikkelin ratkaisu kulki nimellä "bootstrap filter", saapasremmisuodin. Saapasremmisuodin vältti ehtymisen uudellenotannalla, jossa matalapainoiset partikkelit korvattiin otoksilla korkeapainoisemmista partikkeleista. Ratkaisussa painot eivät myöskään riipu partikkelien aiemmista poluista vaan ainoastaan havaintojen uskottavuusfunktiosta. 
+
+Vastaavaa ratkaisua käytetään myös tämän tutkielman uudemmassa SIR-algoritmissa (sampling importance resampling), jossa uudelleenotannassa käytetään tärkeytysotantaa. Termiä hiukkassuodin käytti ensimmäisen kerran Del Moral artikkelissa "Nonlinear Filtering: Interacting Particle Resolution" (1996).  
+SMC-menetelmät termiä Liu ja Chen artikkelissa "Sequential Monte Carlo Methods for Dynamic Systems" (1998). 
 
 # Bayesilainen suodin
 
-Suodinongelmassa ollaan kiinnostuttu tilavektorin posteriorijakauman $p(x_k|y_{1:k})$ estimoinnista. Tässä luvussa käydään läpi epälineaarisen hiukassuotimen yleinen rekursiivinen, Bayesilainen posteriorijakauman laskenta. Tällaista suodinongelman ratkaisua kutsutaan myös Bayesilaiseksi suotimeksi. Koska rekursiota ei voida laskea analyyttisesti, pitää estimoinnissa käyttää numeerisia menetelmiä. SMC-menetelmissä tämä tarkoittaa jakauman sekventiaalista Monte Carlo -approksimointia, jonka toteutus esitetään luvun 3 hiukassuodinalgoritmissa.Esitys noudattaa Fredrik Gustafssonin artikkelia "Particle Filter Theory and Practice with Positioning Applications" (2010). 
+Suodinongelmassa ollaan kiinnostuttu tilavektorin posteriorijakauman $p(x_k|y_{1:k})$ estimoinnista. Tässä luvussa käydään läpi epälineaarisen tilanteen yleinen rekursiivinen, Bayesilainen posteriorijakauman laskenta. Tällaista suodinongelman ratkaisua kutsutaan myös Bayesilaiseksi suotimeksi. Koska epälineaarisessa, ei-normaalijakautuneessa tilanteessa rekursiota ei voida laskea analyyttisesti, pitää estimoinnissa käyttää numeerisia menetelmiä. SMC-menetelmissä tämä tarkoittaa jakauman sekventiaalista Monte Carlo -approksimointia, jonka toteutus esitetään luvun 4 algoritmissa. Esitys noudattaa Gustafssonin artikkelia "Particle Filter Theory and Practice with Positioning Applications" (2010). 
 
 Bayesilainen ratkaisu tilavektorin posteriorijakauman estimaatille $\hat{p}(x_k|y_{1:k})$ saadaan seuraavalla rekursiolla (käydään läpi jokaiselle ajanhetkelle $k=1,\ldots,t$). Lasketaan ensin
 
@@ -209,11 +220,47 @@ Lopuksi lasketaan päivitysaskel ajalle, joka saadaan edelleen kokonaistodennäk
 p(x_{k+1}|y_{1:k})=\int_{\mathbb{R}^{n_x}}p(x_{k+1}|x_k)p(x_k|y_{1:k})\mathop{dx_k}.
 \end{align}
 
-Rekursion avulla voidaan laskea $p(x_k|y_{1:k})$ käymällä rekursio läpi $k$ kertaa.
+Rekursion avulla voimme laskea jakauman $p(x_k|y_{1:k})$ käymällä rekursion läpi $k$ kertaa.
 
-# Hiukassuodin-algoritmi
+# Tärkeytysotanta
 
-Täsäs luvussa esitetään hiukassuodin-SMC-algoritmi Bayesilaisen, epälineaarisen suodinongelman ratkaisemiseksi. Algoritmi on numeerinen toteutus luvussa 2. kuvatusta Bayesilaisesta suotimesta. Esitetty algoritmi perustuu Fredrik Gustafssonin artikkeliin "Particle Filter Theory and Practice with Positioning Applications" (2010).
+Tässä luvussa kuvataan lyhyesti SMC-menetelmissä käytettävä tärkeytysotanta (importance sampling), jonka tarkoituksena on estimoida harhattomasti jakaumaa $p(x|y_{1:k})$, josta emme voi suoraan tehdä otoksia, mutta jota voimme approksimoida toisella jakaumalla $q$. Esitys perustuu Särkän kirjaan *Bayesian Filtering and Smoothing* (2013). 
+
+Oletetaan, että tunnemme priorijakauman $p(x)$ sekä meillä on olemassa havaintomalli $p(y_{1:k}|x)$ sekä valittu tärkeytysjakauma $q(x|y_{1:k})$, josta voimme tehdä otoksia ja jonka kantaja on suurempi tai yhtä suuri kuin jakauman $p(x|y_{1:k})$ ja joka saa nollasta poikkeavia arvoja kaikkialla missä $p(x|y_{1:k})$ saa nollasta poikkeavia arvoja. Kirjoitetaan halutun posteriorijakauman odotusarvo integraalina 
+
+\begin{align}
+\int g(x)p(x|y_{1:k})dx=\int g(x)p(x|y_{1:k})dx=\int g(x)\frac{p(x|y_{1:k})}{q(x|y_{1:k})}q(x|y_{1:k})dx.
+\end{align}
+
+jolle voidaan muodostaa Monte Carlo -approksimaatio tekemällä $N$ otosta jakaumasta $x^i \sim q(x|y_{1:k})$ja muodostamalla odotusarvo
+
+\begin{align}
+\mathbb{E}[g(x)|y_{1:k}]\simeq\frac{1}{N}\sum_{i=1}^N\frac{p(x^i|y_{1:k})}{q(x^i|y_{1:k})}g(x^i)=\sum_{i=1}^Nw^ig(x^i).
+\end{align}
+
+Missä $g(x)$ on jokin estimoinnissa hyödyllinen, mielivaltainen funktio. Tärkeytysotantaa kuvaa nyt algoritmi (\ref{tarkeytysotanta-algo}). Kun posteriorijakauman estimaatti muodostetaan kyseisellä algoritmilla voidaan tulos kirjoittaa
+
+\begin{align}
+\hat{p}(x|y_{1:k})=\sum_{i=1}^{N}w_{k|k}^i \delta(x-x^i)
+\end{align}
+
+missä $\delta(x)$ on Diracin deltafunktio.
+
+\begin{algorithm}\label{tarkeytysotanta-algo}
+\DontPrintSemicolon
+\Begin{
+  \For{$i=1,2,\ldots,N$}{
+    \Begin{Otetaan $N$ otosta tärkeytysjakaumasta $x^i \sim q(x|y_{1:k}).$}
+    \Begin{Lasketaan normalisoimattomat painot $w_*^i= p(y_{1:k}|x^i)p(x^i)/q(x^i|y_{1:k}).$ \newline ja normalisoidut painot $w^i=w_*^i/\sum_{j=1}^Nw_*^j$.}
+    \Begin{Estimoidaan $p$ laskemalla tiheydelle approksimaatio $\mathbb{E}[g(x)|y_{1:k}]\simeq\sum_{i=1}^Nw^ig(x^i)$.}
+    } 
+  }  
+\caption{Tärkeytysotanta}
+\end{algorithm}
+
+# SIR-algoritmi
+
+Täsäs luvussa esitetään SIR-SMC-algoritmi Bayesilaisen, epälineaarisen suodinongelman ratkaisemiseksi. Algoritmi on numeerinen toteutus luvussa 2. kuvatusta Bayesilaisesta suotimesta. Esitetty algoritmi perustuu Fredrik Gustafssonin artikkeliin "Particle Filter Theory and Practice with Positioning Applications" (2010).
 
 Algoritmi alustetaan jakaumasta $x_1^i\sim p_{x_0}$ generoiduilla $N$-kappaleella partikkeleita. Jokaiselle partikkelille annetaan alustuksessa sama paino $w_{1|0}^i=1/N$. Algoritmi suoritetaan jokaiselle partikkelille $i=1,2,\ldots,N$ jokaisella ajanhetkellä $k=1,2,\ldots,t$. Algoritmin kuvauksessa käytetään notaatiota $x_k^i$, joka tarkoittaa, että tila $x_k$ käy ajanhetkellä $k$ gridin pisteessä $x^i$. Notaatiota tarvitaan, koska SMC-algoritmin läpikäymä gridi muuttuu ajan funktiona.
 
@@ -268,7 +315,7 @@ Alla käsitellään algoritmiin liittyvän uudelleenotantamenetelmän, partikkel
     } 
   }  
 }
-\caption{SIR-hiukassuodin}
+\caption{SIR-algoritmi}
 \end{algorithm}
 
 ## Parametrien valinta
@@ -400,8 +447,6 @@ yllä esitetyn sijaan. Tällöin jokaisessa aikapäivitysaskeleessa lasketaan pa
 Algoritmin perusmuodon aikakompleksisuus on $\mathcal{O}(N)$. Uudelleenotantamenetelmän tai ehdotusjakauman valinta ei suoraan vaikuta aikakompleksisuuteen. Sen sijaan marginalisointi edellä esitetyllä tärkeytyspainolla lisää algoritmin aikakompleksisuutta $\mathcal{O}(N)\rightarrow\mathcal{O}(N^2)$, koska jokaisen partikkelin kohdalla painot lasketaan jokaisen tila-aika-avaruuspolun yli. On selvää, että erityisesti isoilla otoskoon $N$ arvoilla ei yllä esitetty marginalisointi enää ole mielekästä. 
 
 Tällaisia tilanteita varten SMC-algoritmista on olemassa $\mathcal{O}(N\text{log}(N))$ -versioita, jotka perustuvat N:n kappaleen oppimiseen (N-body learning). Näiden algoritmien käsittely jää tämän tutkielman ulkopuolelle, mutta katsauksen algoritmeista ovat esittäneet esimerkiksi Klaas &al. artikkelissa "Toward Practical $N^2$ Monte Carlo: the Marginal Particle Filter" (2012). Tutkielman kahdessa ulottuuvuudessa tapahtuvan paikannusesimerkin tapauksessa $\mathcal{O}(N^2)$-aikakompleksisuus ei ole ongelma.
-
-Lisäksi algoritmin aikakompleksisuuteen vaikuttavat seuraavat seikat. T. SUORITUSKYKY. BATCH VS ONLINE. Kun halutaan on-line-estimointia, siinä missä off-line-estimointiin.
 
 # Paikannusesimerkki 
 
@@ -550,6 +595,8 @@ Koe toistettiin $6$ kertaa. Ensimmäisessä vaiheessa testilaite pidettiin paika
 SIS/SIR-algoritmien kohdalla partikkelien lukumääräksi valittiin $N=1000$. SIR-algoritmin kohdalla käytettiin NEFF.
 
 Vertailuarvoina käytettiin puhtaaseen triangulaatioon (TOTAL) perustuvaa XXX. Paikannusten keskivirheet on esitetty taulukossa (\ref{tab:paikannusvirheet}). Parhaimman suorituskyvyn PAIKANNUSMIELESSÄ algoritmi valittiin lisätarkasteluun SMC-algoritmien parametrinvalintaa KOSKIEN.
+
+Lisäksi algoritmin aikakompleksisuuteen vaikuttavat seuraavat seikat. T. SUORITUSKYKY. BATCH VS ONLINE. Kun halutaan on-line-estimointia, siinä missä off-line-estimointiin.
 
 \def\arraystretch{1.25} 
 \begin{table}[H]
