@@ -2,7 +2,7 @@
 title: "SMC-menetelmät"
 subtitle: "Laskennallinen tilastotiede - Harjoitustyö"
 author: "Lasse Rintakumpu"
-date: "`r format(Sys.time(), '%d %B, %Y')`"
+date: "10.5.2021"
 header-includes:
    - \usepackage{color}
    - \usepackage{xspace}
@@ -43,85 +43,6 @@ knitr::opts_chunk$set(echo = FALSE, fig.width=3, fig.height=2.8, fig.show='hold'
 # Used libraries
 library(knitr) # For creating PDF
 library(pander)
-
-#source("R/koeasetelma.R",local=T)
-# Converts zones to polygons
-source("R/zones_as_polygons.R",local=T)
-# Reads point coordinates into a data frame
-source("R/points_as_points.R",local=T)
-```
-
-```{r eval=F}
-# Draw map
-# Zones as polygons plots zonedata as ggplot2 polygons
-source("R/zones_as_polygons.R",local=T)
-# Reads point coordinates into a data frame
-source("R/points_as_points.R",local=T)
-
-# LOAD POLYGONS / POIS
-# Load and wrangle (zone) polygon data
-zones <- read.csv("data/zones.csv")
-zones_for_plotting <- zones_as_polygons(zones)
-
-# Parse recordings
-#recordings <- read_csv("data/information_points.csv") 
-#sensors <- recordings[(nrow(recordings)-2):nrow(recordings),] %>% arrange(id)
-#recordings <- recordings[1:(nrow(recordings)-3),] %>% arrange(id)
-#recordings_xy <- points_as_points(recordings, "position")
-#recordings_xy <- recordings_xy %>% add_column(id=rownames(recordings_xy))
-
-# Parse sensors
-#sensors_xy <- points_as_points(sensors, "position")
-#rownames(sensors_xy) <- substr(sensors$comment, 12, 28)
-# Add single letter name for sensor
-#sensors$name <- c("A","B","C")
-
-# Floor we can just hard-code for now
-floor_polygon_wkt <- "POLYGON (( 22.29453511085012 60.4483613949082752, 22.2946014103945416 60.4484048647438925, 22.2946353387669696 60.448391336179192, 22.2948368842480704 60.44851423830589, 22.2949309344403517 60.4484756693510974, 22.2948474192526227 60.4484273970519439, 22.2949762150528876 60.4483746483148394, 22.2948794145486353 60.4483188093082902, 22.2948949603596738 60.4482877395097233, 22.2949791172868608 60.4482523767460833, 22.2949032348697145 60.4482119549142709, 22.2947736689820957 60.4482661275728788, 22.2947533219121432 60.4482542293099314, 22.2947143172495998 60.4482694438414754, 22.2947224188828876 60.4482957453147307, 22.2946766563109158 60.448312592767202, 22.2946543735452032 60.4483107337472845, 22.29453511085012 60.4483613949082752))"
-floor_polygon <- readWKT(floor_polygon_wkt)
-no_of_coordinates <- length(floor_polygon@polygons[[1]]@Polygons[[1]]@coords[,1])
-starting_index <- 1
-floor_for_plotting <- as.data.frame(matrix(nrow=0, ncol=3))
-floor_for_plotting[starting_index:(starting_index+no_of_coordinates-1),1] <- floor_polygon@polygons[[1]]@Polygons[[1]]@coords[,1]
-floor_for_plotting[starting_index:(starting_index+no_of_coordinates-1),2] <- floor_polygon@polygons[[1]]@Polygons[[1]]@coords[,2]
-floor_for_plotting[starting_index:(starting_index+no_of_coordinates-1),3] <- rep(1, no_of_coordinates)
-colnames(floor_for_plotting) <- c("x", "y", "group")
- 
-# Get "Outside" coordinates from floor polygon bounding box
-outside_x <- floor_polygon@bbox["x","min"]
-outside_y <- floor_polygon@bbox["y","max"]
-
-# Creates site map
-site_map <- ggplot(zones_for_plotting, aes(group=id, x = x, y = y)) + geom_polygon(data=floor_for_plotting, aes(x=x, y=y, group=group), alpha=0.2) + geom_polygon(aes(), alpha=0.2) + xlab("") + ylab("")
-#site_map <- ggplot()
-
-# Only plot locators present in the data
-#locator_macs <- unique(cte_angles_f3$locator_mac)
-locators_subset <- subset(locators, mac %in% locator_macs)
-# Locator coordinates
-locators_xy_original <- points_as_points(locators_subset, "position")
-locators_xy_original$mac <- locators[locators$id %in% locators_xy_original$id,"mac"]
-locators_xy_original$label <- as.character(1:nrow(locators_xy_original))
-locators_xy<- locators_xy_original
-locators_xy$x <- locators_xy$x - 0.00012
-locators_xy$y <- locators_xy$y + 0.000123
-# And plot
-site_map <- site_map + geom_point(data=locators_xy, aes(x = x, y = y, fill = label), size = 5, colour="tomato") +  geom_text(data=locators_xy, aes(label = label, x = x, y = y), color="white", size=3) + guides(fill=guide_legend(keywidth=unit(0,"mm"), override.aes=list(size=0, colour=NA))) + scale_fill_discrete(labels=paste(1:nrow(locators_xy_original), "=", locators_xy$mac)) + labs(fill="XR-2 MAC")
-
-# Add locator legend
-site_map <- site_map + theme(
-    legend.position = c(.95, .95),
-    legend.justification = c("right", "top"),
-    legend.box.just = "right",
-    legend.margin = margin(6, 6, 6, 6)
-    ) + scale_color_manual(values = c(rep('tomato', 12)), name = 'XR-2-vastaanotin')
-
-# Foculator position 1
-#site_map <- site_map + annotate("point", y=60.44819, x=22.29489, color="magenta", size=3)
-# Foculator position 2
-#site_map <- site_map + annotate("point", y=60.44814, x=22.29487, color="magenta", size=3)
-# Foculator position 3
-#site_map <- site_map + annotate("point", y=60.44817, x=22.29496, color="magenta", size=3)
 ```
 
 \newpage
@@ -130,7 +51,7 @@ site_map <- site_map + theme(
 
 SMC-menetelmät (sequential Monte Carlo -mentelmät) ovat joukko Monte Carlo -algoritmeja, joiden avulla voidaan ratkaista ns. suodinongelma, kun ongelma on epälineaarinen ja/tai ongelmaan liittyvä kohina ei noudata normaalijakaumaa. SMC-menetelmille on lukuisia sovellutuksia esimerkiksi Bayesilaisessa tilastotieteessä, fysiikassa ja robotiikassa.
 
-Tämän tutkielman tavoitteena on esittää pääpiirteittäin SMC-menetelmien teoria sekä joitakin menetelmäperheeseen kuuluvia algoritmeja. Tutkielman ensimmäisessä alaluvussa kuvataan yleisellä tasolla sekä suodinongelma että sen ratkaisujen historiaa. Toisessa alaluvussa käsitellään joitakin Monte Carlo -menetelmiin liittyviä yleisiä tuloksia. Kolmannessa alaluvussa esitellään Bayesilainen viitekehys suodinongelmalle, jonka pohjalta neljännessä alaluvussa kuvataan SIR-algoritmina tunnetu SMC-menetelmä. Tutkielman lopussa tarkastellaan menetelmien käyttöä paikannussovelluksessa.
+Tämän tutkielman tavoitteena on esittää pääpiirteittäin SMC-menetelmien teoria sekä joitakin menetelmäperheeseen kuuluvia algoritmeja. Tutkielman ensimmäisessä alaluvussa kuvataan yleisellä tasolla sekä suodinongelma että sen ratkaisujen historiaa. Toisessa alaluvussa käsitellään joitakin Monte Carlo -menetelmiin liittyviä yleisiä tuloksia. Kolmannessa alaluvussa esitellään Bayesilainen viitekehys suodinongelmalle, jonka pohjalta neljännessä alaluvussa kuvataan SIR-algoritmina tunnetu SMC-menetelmä.
 
 Tutkielman esitykset seuraavat erityisesti Simo Särkän kirjaa *Bayesian Filtering and Smoothing* (2013), Fredrik Gustafssonin artikkelia "Particle Filter Theory and Practice with Positioning Applications" (2010) sekä Olivier Cappén, Simon J. Godsillin ja Eric Moulines'n  artikkelia "An overview of existing methods and recent advances in sequential Monte Carlo" (2007). 
 
@@ -351,7 +272,7 @@ c. sekä tarvittava aika-askeleiden lukumäärä.
 
 Ensimmäisen tekijän vaikutus on selvä. Mitä useammassa ulottuvuudessa otantaa tarvitsee tehdä, sen korkeammaksi on $N$ asetettava, jotta jokainen ulottuvuus pystytään kattamaan. Tekijät (*b*) ja (*c*) puolestaan seuraavat uudelleenotannasta. Jos se osa tila-avaruutta, jossa uskottavuus $p(y_k|x_k)$ saa merkittäviä arvoja on pieni verrattuna siihen osaan, jossa priorijakauma $p(x_k|y_{1:k-1})$ saa merkittäviä arvoja, suuri osa partikkeleista saa pieniä painoja eikä näin valikoidu uudelleenotantaan. 
 
-Yleisesti ottaen $N$ kannattaa asettaa sellaiseksi, että se paitsi tuottaa riittävän tarkan estimaatin, on se käytettävissä olevan laskentatehon sekä vaadittavan laskentanopeuden kannalta järkevää. Tähän palataan tutkielman lopuksi empiirisessä paikannusesimerkissä.
+Yleisesti ottaen $N$ kannattaa asettaa sellaiseksi, että se paitsi tuottaa riittävän tarkan estimaatin, on se käytettävissä olevan laskentatehon sekä vaadittavan laskentanopeuden kannalta järkevää.
 
 \subsubsection{Uudelleenotantamenetelmän valinta}
 
@@ -461,188 +382,14 @@ painon (\ref{tarkeytys}) sijaan. Tällöin jokaisessa aikapäivitysaskeleessa la
 
 Algoritmin perusmuodon aikakompleksisuus on $\mathcal{O}(N)$. Uudelleenotantamenetelmän tai ehdotusjakauman valinta ei suoraan vaikuta aikakompleksisuuteen. Sen sijaan marginalisointi tärkeytyspainolla (\ref{marginaalitarkeytys}) lisää algoritmin aikakompleksisuutta $\mathcal{O}(N)\rightarrow\mathcal{O}(N^2)$, koska jokaisen partikkelin kohdalla painot lasketaan jokaisen tila-aika-avaruuspolun yli. On selvää, että erityisesti isoilla otoskoon $N$ arvoilla ei yllä esitetty marginalisointi enää ole mielekästä. 
 
-Tällaisia tilanteita varten algoritmista on olemassa $\mathcal{O}(N\text{log}(N))$ -versioita, jotka perustuvat esimerkiksi N:n kappaleen oppimiseen (N-body learning). Näiden algoritmien käsittely jää tämän tutkielman ulkopuolelle, mutta katsauksen algoritmeista ovat esittäneet esimerkiksi Klaas \&al. artikkelissa "Toward Practical $N^2$ Monte Carlo: the Marginal Particle Filter" (2012). Tutkielman kahdessa ulottuuvuudessa tapahtuvan paikannusesimerkin tapauksessa $\mathcal{O}(N^2)$-aikakompleksisuus ei ole ongelma.
+Tällaisia tilanteita varten algoritmista on olemassa $\mathcal{O}(N\text{log}(N))$ -versioita, jotka perustuvat esimerkiksi N:n kappaleen oppimiseen (N-body learning). Näiden algoritmien käsittely jää tämän tutkielman ulkopuolelle, mutta katsauksen algoritmeista ovat esittäneet esimerkiksi Klaas \&al. artikkelissa "Toward Practical $N^2$ Monte Carlo: the Marginal Particle Filter" (2012).
 
 \section{Lopuksi}
 
 Tässä tutkielmassa on esitetty pääpiirteittäin SMC-menetelmien teoria Bayesilaisessa tilastotieteellisessä viitekehyksessä. Lisäksi tutkielmassa on käyty läpi uudelleenotantaa efektiivisen otoskoon perusteella hyödyntävä SIR-suodinalgoritmi. Lopuksi tutkielmassa on tarkasteltu SIR-algoritmin parametrien valintaan, suorituskykyyn sekä konvergenssiin liittyviä tuloksia.
 
-\section{Paikannusesimerkki}
-
-Sisätilapaikannus *** on BLAHBLAHBLAH. Koska GPS ei toimi sisätiloissa, tarvitaan muita paikannusratkaisuja. Radiosignaaleihin perustuvat paikannusratkaisut ovat BLAHBLABH. Eräs mahdollinen XXX, jossa käytetään tulokulmaa paikantamaan. Walkbase käyttää sisätilapaikannusta erityisesti ruokakaupoissa sekä tavarataloissa asiakkaiden käyttäytymistä koskevan keräämiseen. Tyypillinen .. XXX ostoskärryihin ja -koreihin XXX keräämään tärkeää paikannusdataa asiakkaiden XXX. Markkinoilla on XXX on Walkbase kehittänyt oman laitteistoratkaisunsa. SKENAARIOISSA TARVITAAN Tavoitteena on alle metrin paikannusvirhe.
-
-Esimerkissä käyteteään SMC-algoritmia Bluetooth-paikannussovelluksessa paikannustarkkuuden parantamiseen. Paikannukseen käytettävä data kerätään toimistoympäristössä liikkuvien BLE-lähettimien sekä kattoon sijoitettujen vastaanottimien avulla. Havainnot koostuvat vastaanottimien lähettimien signaalien perusteella laskemista, BLE5.1-standardin mukaisista signaalin tulokulmista eli AoA-havainnoista (angle of arrival). Paikannukseen käytetään triangulaatio-algoritmia. Lopuksi esimerkissä analysoidaan ja vertaillaan algoritmin eri versioiden suorituskykyä sekä suorituskyvyn että paikannustarkkuuden näkökulmasta.
-
-\subsection{Koeasetelma}
-
-Paikaunnusesimerkissä lähettimenä toimi 25 Bluetooth-paikannustagista koostuva Walkbase Foculator -testilaite (kuva \ref{fig:foculator}), vastaanottimena toimistoympäristöön asennetut seitsemän Walkbase XR-2 -vastaanotinta (kuva \ref{fig:xr2}). Jokainen vastaanotin sisältää kahdeksan antennia, joiden vastaanottamien lähetinsignaalien perusteella vastaanottimet laskevat signaalin tulokulman suhteessa vastaanottimeen. Tarkka tulokulmien laskemiseen käytetty algoritmi on paikantimen antennit toimittaneen Silicon Laboratories, Inc. -yrityksen liikesalaisuus, mutta ***perusperiaate on. 
-
-AoA relies on a single-antenna transmit beacon with continuous tone extension appended to a Bluetooth packet transmission and a locator receiver device to measure the arrival angle of the signal using an array of antennas. Each antenna in the array sees phase differences due to different line of sight distances to the beacon device. The antennas in the array are switched during continuous tone extension, resulting in IQ samples with phase information for each antenna. This IQ-data is fed to an angle estimator algorithm. In this AoA use case, the receiving device tracks arrival angles for individual transmit beacon objects.
-
-Esteettömässä ympäristössä XXX kulman virhe on hyvin pieni ja paikannusongelma voidaan ratkaista suoraan jollakin triangulaatio-algoritmilla. Eräänä XXX ToTal-algoritmia. Tässäkin tilanteessa voi paikannusta parantaa suodattimen käytöllä, mutta jo triangulaatioä-algoritmin perusversio tuottaa halutun tarkkuuden. Toimistoympäristö on kuitenkin haastava, sillä erityisesti näyttöruudut sekä heijastavat että estävät radiosignaaleja. Silicon Labs lupaa omalle AoA-järjestelmälleen vastaavassa toimisympäristössä (seitsemällä paikantimella) kulmavirheen välillä $\pm 3.7-5.7$. Tämä ei kuitenkaan riitä johdonmukaisesti haluttuun alle metrin paikannustarkkuuteen, joten AoA-paikannus toimistoympäristössä tarjoaa hyvän motivaation SMC-menetelmien käyttämiseen.
-
-\begin{multicols}{2}
-\begin{figure}[H]
-\centering
-\includegraphics[width=7cm]{foculator}
-\caption{Walkbase Foculator}
-\label{fig:foculator}
-\end{figure}
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=7cm]{xr_2}
-\caption{Walkbase XR-2}
-\label{fig:xr2}
-\end{figure}
-\end{multicols}
-
-Data on kuvattu tarkemmin alaluvussa 5.2. Koeympäristön pohjapiirustus on esitetty kuvassa (\ref{fig:pohjapiirustus}). Piirustuksessa XR-2-paikantimet on kuvattu punaisilla ympyröillä. Foculator-testilaitteen liikerata on kuvattu sinisellä viivalla. Toimistoympäristön pohjapiirustus on kuvattu harmaalla niin, että piirustuksesta erottuvat toimiston väliseinät.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=16cm]{office_map}
-\caption{Koeasetelman pohjapiirustus}
-\label{fig:pohjapiirustus}
-\end{figure}
-
-Ennen datan keräämistä testilaite asennettiin kiinni robottiin (kuva \ref{fig:robotti}) $1.5$ metrin korkeudelle. Robotti oli ohjelmoitu ennalta seuraamaan haluttua liikerataa vastaavia lattiamerkintöjä ennalta määrätyllä nopeudella $Xm/s$. Kyseinen liikerata on merkitty koeympäristön pohjapiirustukseen sinisellä katkoviivalla. Data kerättiin sinä aikana, kun robotti liikkui liikeradan lähtöpisteestä (piste A) liikeradan maalipisteeseen (piste B). Robotilta kului matkaan $Y$ sekuntia. Sekä korkeus että nopeus valittiin niin, että ne ap XXX TÄGILLÄ MERKITYN ostoskärryjen liikkumista kauppaympäristössä. HUOMIO: Testaaminen vaikeammassa ympäristössä.
-
-\begin{figure}[H]
-\centering
-\includegraphics[width=7cm]{robotti}
-\caption{Testirobotti}
-\label{fig:robotti}
-\end{figure}
-
-Data kerättiin yöaikana, jolloin toimiston käyttöaste oli minimissä. Tällä minimoitiin radiosignaalien tielle osuvien ihmisten vaikutus signaaleihin.
-
-\subsection{Datan kuvaus}
-
-Riippuen päällä olevien paikannustagien lukumäärästä, tuottaa n. havainto sekunnissa. Havaintoja on $N_{obs}=X$ kappaletta, joka kattaa $Y$ minuuttia. Havaintojen aikaleimat on tallennettu sekunnin tuhannesosan tarkkuudella. Jokainen havainto koostuu taulukossa \ref{tab:muuttujat} kuvatuista muuttujista.
-
-\def\arraystretch{1.25} 
-\begin{table}[H]
-\centering
-\begin{tabular}{|l|l|l|}
-\hline
-Muuttuja & Kuvaus & Esimerkkiarvo\\
-\hline
-ts & havainnon aikaleima & 21:38:20.998+00\\
-asset\_tag\_mac & lähettimen MAC-osoite & 5c:02:72:67:f7:4c\\
-locator\_mac & vastaanottimen MAC-osoite & b8:27:eb:66:0d:2a\\
-locator\_lat & vastaanottimen sijainti (leveyspiiri) & 60.448265\\
-locator\_lon & vastaanottimen sijainti (pituuspiirit) & 22.294823\\
-bearing & suuntimakulma $\eta$ (astetta) & 34\\
-height & vastaanottimen korkeus (m) & 2.22 \\
-rssi & signaalin vahvuus (dBm) & -81\\
-distance & arvioitu etäisyys lähettimeen (m) & 13.5\\
-azimuth\_angle & atsimuuttikulma $\phi$ (astetta) & 102.7\\
-converted\_angle & napapohjoisesta laskettu kulma $\Phi$ (astetta) & 34\\
-\makecell[tl]{opposite\_angle} & \makecell[tl]{vastakkainen kulma\\ (lähetin-vastaanotin) $\Phi^\prime$ (radiaania)} & \makecell[tl]{3.735}\\
-elevation\_angle & korkeuskulma (astetta) & 11.9\\
-\makecell[tl]{quality\_ant\_phase\_jitter} & \makecell[tl]{antennikohtainen jitter} & \makecell[tl]{ (0.15,0.15,0.15,0.15,\\0.14,0.16,0.29,0.34)}\\
-ss\_jitter & antennikohtaisten jitter-arvojen neliösumma & 0.3349\\
-\makecell[tl]{quality\_ant\_snr} & \makecell[tl]{antennikohtainen signaali-kohinasuhde} & \makecell[tl]{(24.76,37.48,40.75,36.37\\ 28.5,28.2,16.15,11.27)}\\
-\makecell[tl]{snr\_jitter} & \makecell[tl]{antennikohtaisten signaali-kohinasuhteiden\\neliösumma} & \makecell[tl]{6996.473}\\
-\hline
-\end{tabular}
-\caption{Havaintomuuttujat}
-\label{tab:muuttujat}
-\end{table}
-
-Etäisyys on estimoitu signaalin vahvuudesta käyttäen valmistajan omaa, tuntematonta propagaatiomallia. Etäisyyttä tai signaalin vahvuutta ei käytetä paikantamiseen, joten tämän mallin käsittely jätetään tutkielman ulkopuolelle. Munoz (2009) luku 2 sisältää yleiskatsauksen myös propagaatiomalleihin.
-
-Atsimuuttikulma $\phi$ lasketaan aina vastaanottimen tietyltä sivulta, joten se vastaa napapohjoista ainoastaan siinä tapauksessa, että vastaanottimen kyseinen sivu on asetettu kohtisuoraan napapohjoiseen nähden. Käytännön syistä tämä ei ole aina mahdollista eikä edes haluttavaa. Sen vuoksi jokaiselle vastaanottimelle on tietokantaan tallennettu oma suuntimakulma $\eta$. Triangulaatiossa alla käytetään napapohjoisesta laskettuja kulmia $\Phi$, jotka lasketaan jokaiselle havainnolle havainnon vastaanottimen suuntimakulman avulla
-
-\begin{align}
-\Phi=(\phi + \eta+360^\degree) \mod360^\degree.
-\end{align}
-
-Suuntimakulma $\Phi$ kertoo kuitenkin vastaanottimen ja lähettimen välisen kulman. Koske olemme kiinnostuneet paikantamaan lähetintä, lasketaan yhtälöllä (\ref{vastakkainen-kulma}) suuntimakulman perusteella edelleen lähettimen ja vastaanottimen välinen kulma $\Phi^\prime$. Samalla asteissa oleva kulma muunnetaan radiaaneiksi paikannusta varten.
-
-\begin{align}\label{vastakkainen-kulma}
-\Phi^\prime=\frac{\pi}{180^\degree}(\Phi+180^\degree \mod360^\degree).
-\end{align}
-
-Lisäksi havainnot sisältävät antennikohtaiset jitter- ja SNR-arvot sekä näistä lasketut neliösummat. Havaintomuuttujien ohella koetilanteessa tallennettiin Foculator-testilaitteen todellinen sijainti sekunnin tarkkuudella. Tallennettu sijainti perustui koeympäristön lattiaan pohjapiirrustusten ja laser-mittausten avulla tehtyihin merkintöihin. Näin saadut testimuuttujat on kuvattu taulukossa (\ref{tab:testimuuttujat}).
-
-\def\arraystretch{1.25} 
-\begin{table}[H]
-\centering
-\begin{tabular}{|l|l|l|}
-\hline
-Muuttuja & Kuvaus & Esimerkkiarvo\\
-\hline
-foculator\_ts & aikaleima & 21:38:20+00\\
-foculator\_lat & testilaitteen sijainti (leveyspiiri) & 60.44819 \\
-foculator\_lon & testilaitteen sijainti (pituuspiiri) & 22.29493 \\
-\hline
-\end{tabular}
-\caption{Testimuuttujat}
-\label{tab:testimuuttujat}
-\end{table}
-
-Testimuuttujia käytetään alla SMC-paikannusalgoritmin paikannusvirheen laskemisessa. 
-
-\subsection{Ongelman kuvaus}
-
-Tarkoituksena on estimoida testilaitteen/robotin sijainti sekunnin tarkkuudella. Merkitään estimoitavaa tilasarjaa $x_{1:k}=\{x_1,\ldots,x_k\}$. Lisäksi merkitään $x_o$ testilaitteen lähtösijaintia. Jokainen tilasarjan havainto koostuu sekä pituus- että leveyskoordinaateista. Määritellään tilalle robotin kulkua kuvaava Markov-malli (\ref{tilamalli}):
-
-\begin{align}\label{tilamalli}
-x_{k+1}=f(x_k, \nu_k)=x_k+D_k \begin{bmatrix} \cos\psi_k \\ \sin\psi_k \end{bmatrix}+\nu_k
-\end{align}
-
-missä $D_k$ on testilaitteen/robotin ajanhetkenä $k$ kulkema matka ja $\psi_k$ robotin atsimuutti/suuntimakulma kyseisenä ajanhetkenä. $\nu_k$ on kohinaa, NORMAALIOLETUS. Vastaavasti $y_{1:k}=\{y_1,\ldots,y_k\}$ kuvaa paikantimien ja lähettimien välillä laskettuja MUUTTUJAT.
-
-\begin{align}\label{havaintomalli}
-y_k=h(x_k)+e_k=MULTIANGULAATIOMALLI
-\end{align}
-
-MALLIN VALINTA.
-
-\subsection{Algoritmi}
-
-Koeasetelmassa käytetty SMC-algoritmi on toteuttu  koetta varten alusta asti R-kielellä. Datan käsittelyyn koodi käyttää R:n `tidyverse`-kirjastoa. MUUT KÄYTETYT KIRJASTOT. Algoritmin koodi löytyy tutkielman liitteestä 1. 
-
-Algoritmin toteutuksessa on otettu huomioon seuraavat suorituskykyyn liittyvät pullonkaulat.
-
-\subsection{Tulokset}
-
-Koe toistettiin $6$ kertaa. Ensimmäisessä vaiheessa testilaite pidettiin paikallaan ja kerättyyn dataan sovellettiin kolmea eri algoritmia. Ensin paikannus suoritettiin pelkän ToTal-algoritmin avulla. Tätä puhtaaseen triangulaatioon perustuvaa paikannusta käytetään vertailuarvona 
-
-SIR-algoritmn kohdalla partikkelien lukumääräksi valittiin $N=1000$. SIR-algoritmin kohdalla käytettiin NEFF.
-
-Vertailuarvoina käytettiin puhtaaseen triangulaatioon (TOTAL) perustuvaa XXX. Paikannusten keskivirheet on esitetty taulukossa (\ref{tab:paikannusvirheet}). Parhaimman suorituskyvyn PAIKANNUSMIELESSÄ algoritmi valittiin lisätarkasteluun SMC-algoritmien parametrinvalintaa KOSKIEN.
-
-Lisäksi algoritmin aikakompleksisuuteen vaikuttavat seuraavat seikat. T. SUORITUSKYKY. BATCH VS ONLINE. Kun halutaan on-line-estimointia, siinä missä off-line-estimointiin.
-
-\def\arraystretch{1.25} 
-\begin{table}[H]
-\centering
-\begin{tabular}{|l|l|l|l|}
-\hline
-Koeasetelma & Algoritmi & Keskimääräinen paikannusvirhe $\epsilon$ & Sijaintien lukumäärä $k$\\
-\hline
-Testilaite paikoillaan & ToTaL & & \\
-Testilaite paikoillaan & SIR & &\\
-Testilaite paikoillaan & SIR (N-eff) & &\\
-Liikkuva testilaite & ToTaL & & \\
-Liikkuva testilaite & SIR & &\\
-Liikkuva testilaite & SIR (N-eff) & &\\
-\hline
-\end{tabular}
-\caption{Paikannusvirheet}
-\label{tab:paikannusvirheet}
-\end{table}
-
-\section{Lopuksi}
-
-Tässä tutkielmassa on esitetty pääpiirteittäin SMC-menetelmien teoria Bayesilaisessa/tilastotieteellisessä viitekehyksessä. Lisäksi tutkielmassa on käyty läpi uudelleenotantaa adaptiivisesti efektiivisen otoskoon perusteella hyödyntävä SIR-suodinalgoritmi. Tutkielmassa on myös käyty lävitse joitain algoritmien parametrien valintaan, suorituskykyyn sekä konvergenssiin liittyviä tuloksia.
-
-Tutkielmassa on lisäksi tarkasteltu miten eri valinnat vaikuttavat algoritmin suorituskykyyn yksinkertaisen mutta kattavan ja todelliseen ongelmaan sekä dataan perustuvan paikannusesimerkin avulla. Jatkossa tutkielmaa olisi mahdollista laajentaa esimerkiksi JATKOKYSYMYKSIÄ.
-
 \begin{thebibliography}{99}
+\bibitem{Cappe2007} Cappé, O., Godsill, S. J., Moulines, E., 2007. An Overview of Existing Methods and Recent Advances in Sequential Monte Carlo. \textit{Proceedings of the IEEE}, Vol 95, No 5, 899\textendash 924.
 \bibitem{Crisan2014} Crisan, D. 2014. The stochastic filtering problem: A brief historical account. \textit{Journal of Applied Probability}, Vol 51(A), 13\textendash 22.
 \bibitem{Crisan2000} Crisan, D., Doucet, A. 2000. \textit{Convergence of Sequential Monte Carlo Methods}. 
 \bibitem{Crisan2002} Crisan, D., Doucet A. 2002. A survey of convergence results on particle filtering methods for practitioners. \textit{IEEE Transactions on Signal Processing}, Vol 50, No 3, 736\textendash 746.
@@ -656,5 +403,3 @@ nonlinear/non-Gaussian Bayesian state estimation. \textit{IEE Proc. F, Radar Sig
 \bibitem{Munoz2009} Munoz, D., Enriquez-Caldera, R., Vargas, C., Bouchereau Lara, F. 2009. \textit{Position Location Techniques and Applications}. Elsevier.
 \bibitem{Sarkka2013} Särkkä, S. 2013. \textit{Bayesian Filtering and Smoothing}. Cambridge University Press.
 \end{thebibliography}
-
-\section*{Liite 1: SMC-paikannusalgoritmin R-koodi}
